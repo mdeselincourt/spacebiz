@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+              http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5"
+         xmlns="http://java.sun.com/xml/ns/javaee">
+
+  <!-- Servlets & Servlet-Mappings -->
+  
+  <!-- PRICE SERVICE -->
+  <!-- Price Service Servlet -->
+  <servlet>
+    <servlet-name>marketPriceServiceImpl</servlet-name>
+    <servlet-class>com.google.gwt.sample.stockwatcher.server.MarketPriceServiceImpl</servlet-class>
+  </servlet>
+  
+  <!-- Price Service Servlet Mapping -->
+  
+  <servlet-mapping>
+    <servlet-name>marketPriceServiceImpl</servlet-name><!-- links to the above-->
+    <url-pattern>/stockwatcher/marketPrices</url-pattern><!-- url to bind to this servlet -->
+  </servlet-mapping>
+
+  <!--  BUSINESS SERVICE -->
+  <!-- Business Service Servlet -->
+  <servlet>
+    <servlet-name>businessServiceImpl</servlet-name>
+    <servlet-class>com.google.gwt.sample.stockwatcher.server.BusinessServiceImpl</servlet-class>
+  </servlet>
+  
+  <!-- Business Servlet Mapping -->
+  
+  <servlet-mapping>
+    <servlet-name>businessServiceImpl</servlet-name><!-- links to the above-->
+    <url-pattern>/stockwatcher/business</url-pattern><!-- url to bind to this servlet -->
+  </servlet-mapping>
+
+    <!--  PLAYER SERVICE -->
+  <!-- Player Service Servlet -->
+  <servlet>
+    <servlet-name>playerServiceImpl</servlet-name>
+    <servlet-class>com.google.gwt.sample.stockwatcher.server.PlayerServiceImpl</servlet-class>
+  </servlet>
+  
+  <!-- Player Servlet Mapping -->
+  
+  <servlet-mapping>
+    <servlet-name>playerServiceImpl</servlet-name><!-- links to the above-->
+    <url-pattern>/stockwatcher/player</url-pattern><!-- url to bind to this servlet -->
+  </servlet-mapping>
+  
+  <!-- Default page to serve -->
+  <welcome-file-list>
+    <welcome-file>StockWatcher.html</welcome-file>
+  </welcome-file-list>
+
+  <!-- Security constraints! Let's try it! -->
+  <security-constraint>
+      <web-resource-collection>
+          <web-resource-name>default</web-resource-name>
+          <url-pattern>/*</url-pattern>
+      </web-resource-collection>
+      <auth-constraint>
+          <role-name>*</role-name>
+      </auth-constraint>
+  </security-constraint>
+  
+</web-app>
