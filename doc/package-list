@@ -1,0 +1,5 @@
+com.google.gwt.sample.stockwatcher.client
+com.google.gwt.sample.stockwatcher.client.data
+com.google.gwt.sample.stockwatcher.client.services
+com.google.gwt.sample.stockwatcher.server
+com.google.gwt.sample.stockwatcher.shared

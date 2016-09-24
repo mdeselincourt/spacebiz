@@ -1,5 +1,8 @@
 package com.google.gwt.sample.stockwatcher.client;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -10,6 +13,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 // atomic widgets into a UI element
 public class MarketPage extends Content {
 
+	Logger logger = Logger.getLogger(HomePage.class.toString());
+	
 	//// Create the widgets that live in this page ////
 	private Label marketPageHeader = new Label("Market Page");
 
@@ -62,6 +67,8 @@ public class MarketPage extends Content {
 
 	private void refreshPrices() {
 
+		logger.log(Level.INFO, "refreshPrices() running");
+		
 		// 1. Initialise the service proxy
 		if (marketPriceService == null) {
 			marketPriceService = GWT.create(MarketPriceService.class);
@@ -72,15 +79,23 @@ public class MarketPage extends Content {
 
 			// 2.a() react to failures
 			public void onFailure(Throwable exception) {
-				// TODO: Doesn't handle errors
+				
+				logger.log(Level.SEVERE, "refreshPrices(): Callback response is failure!");
+				
+				exception.printStackTrace();
 			}
 
 			// 2.b() react to success
 			public void onSuccess(MarketPrice[] marketPriceArray) {
+				
+				logger.log(Level.INFO, "refreshPrices(): Callback successfully called");
+				
 				updateTable(marketPriceArray);
 			}
 		}; // End of inline AsyncCallback
 
+		logger.log(Level.INFO, "Handler defined, sending asynchronous request");
+		
 		// 3. Call the service, by calling the method on the class that "proxies" the service
 		marketPriceService.getPrices(callbackMarketPrices);
 	}
