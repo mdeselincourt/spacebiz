@@ -7,6 +7,9 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+// TODO: IS THIS USED AT ALL or is it leftover code from before I understood
+//  we could use GAE's native login
+
 // Class
 public class LoginPage extends Content {
 	
