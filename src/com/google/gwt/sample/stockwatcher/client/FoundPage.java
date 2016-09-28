@@ -12,6 +12,8 @@ import com.google.gwt.sample.stockwatcher.client.services.PlayerServiceAsync;
 
 import com.google.gwt.sample.stockwatcher.shared.FieldVerifier;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,15 +35,21 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.googlecode.objectify.Key;
 import com.google.gwt.sample.stockwatcher.client.data.Business;
 import com.google.gwt.sample.stockwatcher.client.data.Player;
+import com.google.gwt.sample.stockwatcher.client.data.cards.CharacterClass;
 
 /**
+ * Create-persistent-Player form. 
+ * 
  * Entry point classes define <code>onModuleLoad()</code>.
+ * 
+ * TODO: Post-CCG design, "Found" is the wrong name for this page, it needs to be renamed or maybe multi-purposed.
  */
 public class FoundPage extends Content {
 
@@ -55,10 +63,15 @@ public class FoundPage extends Content {
 	
 	// Declare widgets
 	VerticalPanel pageRootPanel;
-	
+
+	// Player form
 	Label newPlayerHandleLabel;
 	TextBox newPlayerHandleField;
 	
+	// // Player/CCG form
+	ListBox characterClassesListBox;
+	
+	// Biz form
 	TextBox nameField;
 	TextBox tickerField;
 	Label companyIdentityEntryLabel;
@@ -69,6 +82,9 @@ public class FoundPage extends Content {
 	TextBox foundingEquityField;	
 	Label foundingEquityOutcomeLabel;
 	Label foundingCapitalLabel;
+	
+	
+	// Form bottom
 	Button foundCompanyButton;
 	Button marketPageButton;
 	
@@ -266,6 +282,19 @@ private void instantiateWidgets() {
 		
 		hideNewPlayer();
 		
+		// Field for char type selection
+		characterClassesListBox = new ListBox();
+		
+		ArrayList<CharacterClass> ccal = CharacterClass.getCharacterClassData(); 
+		
+		Iterator<CharacterClass> ccalIterator = ccal.iterator();
+		
+		while(ccalIterator.hasNext()) {
+			CharacterClass cc = ccalIterator.next();
+			characterClassesListBox.addItem(cc.getName(), cc.getCharacterClassId());
+		}
+
+		
 		// field for accepting company name
 		nameField = new TextBox();
 		nameField.setText("Acme");
@@ -311,6 +340,10 @@ private void instantiateWidgets() {
 		pageRootPanel.add(newPlayerHandleLabel);
 		pageRootPanel.add(newPlayerHandleField);
 		
+		// Player/CCG form
+		pageRootPanel.add(characterClassesListBox);
+		
+		// Founding form
 		pageRootPanel.add(companyIdentityEntryLabel);
 		pageRootPanel.add(nameField);
 		pageRootPanel.add(tickerField);
@@ -337,19 +370,30 @@ private void instantiateWidgets() {
 	
 
 	public void showNewPlayer() { 
+		
+		logger.log(Level.INFO, "Showing the new player form by updating stylenames");
+		
 		newPlayerHandleLabel.removeStyleName("hidden");
 		newPlayerHandleLabel.addStyleName("unhidden");
+		
 		newPlayerHandleField.removeStyleName("hidden");
-		newPlayerHandleField.addStyleName("unhidden"); 
+		newPlayerHandleField.addStyleName("unhidden");
+		
+		// Doesn't work... characterClassesListBox.removeStyleName("hidden");
+		//characterClassesListBox.addStyleName("unhidden");
 	}
 	
-	public void hideNewPlayer() { 
+	public void hideNewPlayer() {
 		
 		logger.log(Level.INFO, "Hiding the new player form by updating stylenames");
 		
 		newPlayerHandleLabel.removeStyleName("unhidden");
 		newPlayerHandleLabel.addStyleName("hidden");
+		
 		newPlayerHandleField.removeStyleName("unhidden");
-		newPlayerHandleField.addStyleName("hidden");		
+		newPlayerHandleField.addStyleName("hidden");
+		
+		// Doesn't work... characterClassesListBox.removeStyleName("hidden");
+		// characterClassesListBox.addStyleName("unhidden");
 	}
 }
