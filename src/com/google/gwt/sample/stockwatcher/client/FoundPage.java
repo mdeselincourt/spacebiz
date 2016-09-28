@@ -188,6 +188,11 @@ public class FoundPage extends Content {
 				// 2. Set up the callback object (GWT standard, but uses generics for my stuff). I don't recall why <String>
 				//    This object will process what happens when we get a reply from the RPC
 				
+				/** 
+				 * ANONYMOUS INNER CLASS THAT EXECUTES ASYNCHRONOUSLY UPON RESPONSE 
+				 * 
+				 * TODO: Actually UPDATE THE UI UPON RESPONSE! 
+				 */
 				AsyncCallback<Key<Player>> playerCallback = new AsyncCallback<Key<Player>>() {
 					
 					// 2.a() react to failures
@@ -203,13 +208,15 @@ public class FoundPage extends Content {
 					}
 				}; // End of inline AsyncCallback
 				
-				// 3. Call the service
+				// 3. Collect the data and call the service
 				
 				Player newPlayer = new Player();
 				
 				// We DON'T set the ID because the server can do that from the current user's gae email address, ensuring it's correct
 				newPlayer.setHandle(newPlayerHandleField.getText());
 				newPlayer.setActiveBusiness(null); // TODO: This will need to be implemented or come out
+				
+				// TODO: Store the player's choice of class
 				
 				// TODO: Catch serialisation exceptions
 				// Do not bother to specify GAE user data- the service needs to be

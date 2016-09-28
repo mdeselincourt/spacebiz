@@ -60,4 +60,6 @@ public class Player implements Serializable {
 	public void setHandle(String handle) {
 		this.handle = handle;
 	}
+
+
 }
