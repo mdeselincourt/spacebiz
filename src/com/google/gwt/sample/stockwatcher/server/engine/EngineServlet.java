@@ -38,6 +38,11 @@ public class EngineServlet extends HttpServlet {
 	  private void spawnNewAvailableJobs() {
 
 		  // TODO: Need a JOB class probably
+		  
+		  // Single job of the day... I have a bad feeling about this, persisting this shit...
+		  
+		  
+		  
 		 
 	  }
 	  

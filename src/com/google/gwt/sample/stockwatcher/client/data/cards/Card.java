@@ -5,12 +5,10 @@ import java.util.EnumMap;
 import java.util.Map;
 
 // ENUMS are "inherently serializable"
-public enum Card {
+public class Card {
 	
 	//private static final long serialVersionUID = 1866560258328829065L;
 
-	NOTHING ("Nothing happens", )
-	
 	private String name;
 	private Map<CardVal, Integer> effects;
 	
@@ -34,7 +32,7 @@ public enum Card {
 		this.effects = effects;
 	}
 	
-	public enum cardExemplars  { NOTHING };
+	public enum cardExemplars  { NOTHING_HAPPENS };
 	
 	/**
 	 * Empty constructor (to easier support serialization)
@@ -53,9 +51,10 @@ public enum Card {
 		
 		switch (e) {
 			
-			case NOTHING:
+			case NOTHING_HAPPENS:
 				name = "Nothing happens";
 				effects = new EnumMap<CardVal, Integer>(CardVal.class);
+				// Its effects are empty!
 				break;
 				
 			default:

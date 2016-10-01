@@ -1,0 +1,2 @@
+serviceClass: com.google.gwt.sample.stockwatcher.client.services.PlayerService
+path: 7DE217676A16C214AC1166B394A8E956.gwt.rpc
