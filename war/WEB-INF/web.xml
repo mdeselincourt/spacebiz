@@ -7,6 +7,7 @@
 
   <!-- Servlets & Servlet-Mappings -->
   
+  <!-- GWT RPC SERVLETS (???????????????!!!!!!!!!!!!!!!!) -->
   <!-- PRICE SERVICE -->
   <!-- Price Service Servlet -->
   <servlet>
@@ -49,21 +50,24 @@
     <url-pattern>/stockwatcher/player</url-pattern><!-- url to bind to this servlet -->
   </servlet-mapping>
   
-  
-  <!-- ENGINE service - for cron jobs to run the bg logic -->
  
- <!-- 1. Engine Service Servlet -->
- <servlet>
- 	<servlet-name>engineServiceImpl</servlet-name>
- 	<servlet-class>com.google.gwt.sample.stockwatcher.server.engine.EngineServiceImpl</servlet-class>
- </servlet>
- 
- <!-- 2. Engine Servlet mapping -->
-  <servlet-mapping>
-  	<servlet-name>engineServiceImpl</servlet-name>
-  	<url-pattern>/stockwatcher/engine</url-pattern>
-  </servlet-mapping>
+  <!-- NON RPC SERVLETS (?????????!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!) -->
+  <!-- ENGINE Servlet - for cron jobs to run the bg logic -->
+
+  <!-- 1. Engine Service Servlet -->
+  <servlet>
+  	<servlet-name>EngineServlet</servlet-name>
+  	<servlet-class>com.google.gwt.sample.stockwatcher.server.engine.EngineServlet</servlet-class>
+  </servlet>
   
+  <!-- 2. Engine Servlet mapping -->
+   <servlet-mapping>
+   	<servlet-name>EngineServlet</servlet-name>
+   	<url-pattern>/admin/engine</url-pattern>
+   </servlet-mapping>
+  
+   <!--  OTHER SINGULAR STUFF -->
+   
   <!-- Default page to serve -->
   <welcome-file-list>
     <welcome-file>StockWatcher.html</welcome-file>
@@ -79,5 +83,15 @@
           <role-name>*</role-name>
       </auth-constraint>
   </security-constraint>
+  
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>admin</web-resource-name>
+            <url-pattern>/admin/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>admin</role-name>
+        </auth-constraint>
+    </security-constraint>
   
 </web-app>
