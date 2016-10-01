@@ -23,5 +23,23 @@ public class EngineServlet extends HttpServlet {
 	    resp.setContentType("text/plain");
 	    resp.getWriter().println("EngineServlet.doGet() running");
 	    logger.info("EngineServlet.doGet() running");
+	    
+	    
+	    // GAME ENGINE SIMULATION LOOP
+	    
+	    runEngine();
+	    
 	  }
+	  
+	  private void runEngine() {
+		  spawnNewAvailableJobs();  
+	  }
+	  
+	  private void spawnNewAvailableJobs() {
+
+		  // TODO: Need a JOB class probably
+		 
+	  }
+	  
+	  
 	}
