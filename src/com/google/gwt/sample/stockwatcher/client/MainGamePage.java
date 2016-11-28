@@ -157,7 +157,7 @@ public class MainGamePage extends Content implements PlayerDisplayer {
 			// Get holdings
 			HashMap<String,Holding> holdings = player.getHoldings();
 			
-			refreshWorld();
+			// refreshWorld();
 			
 			// Can't use this because it's generic and I have price calculation to do?
 			// holdingsGrid.gridifyVector(v); 
