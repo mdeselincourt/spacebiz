@@ -107,6 +107,13 @@ public class PlayerServiceImpl extends RemoteServiceServlet implements PlayerSer
 					
 					Player p = userPlayerResult.now(); // ... execute query, return a Player. Synchronously?!?
 					
+					// Code to be conducted on the player following retrieval from objectify
+					if (p != null) {
+						
+						// There isn't any
+						
+					}
+					
 					log.info("PlayerServiceImpl.getUserPlayer() User's Player retrieved, in theory");
 					
 					return p; // Might be null; am intentionally NOT catching this here but leaving it for

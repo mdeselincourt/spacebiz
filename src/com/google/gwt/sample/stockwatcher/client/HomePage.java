@@ -17,6 +17,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 /**
  * HomePage view
  * 
+ * Identifies your login state
+ * Link to #found page (if no Player found) or #MainGamePage (if player found) 
+ * Link to manual page
+ * 
  * @extends Content so that the navigation handler can load it 
  * @implements PlayerDisplayer so it can be instructed to display a Player 
  * 

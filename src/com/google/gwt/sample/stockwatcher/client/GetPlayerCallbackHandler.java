@@ -8,8 +8,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
  * Class that will wait for a method response then call views with the results.
- * 
- * Currently only supports one view, but there's no reason why it couldn't iterate through a collection
+ * Usage: instantiate this with a reference to a page that implements PlayerDisplayer,
+ * and when the call is complete displayPlayer(player) will be called on the page Currently only supports one view, but there's no reason why it couldn't iterate through a collection
  * 
  * @author MichaelDeSelincourt
  *
@@ -23,7 +23,14 @@ public class GetPlayerCallbackHandler implements AsyncCallback<Player> {
 	Logger logger = Logger.getLogger(GetPlayerCallbackHandler.class.toString());
 		
 	/**
-	 * Currently only supports one view, but there's no reason why it couldn't iterate through a collection
+	 * Marks a page (or anything that implements PlayerDisplayer) for sync callback update
+	 * 
+	 * Usage: Construct this object with a reference to the 'page' (anything that
+	 * implements PlayerDisplayer) that you want to have updated when a response comes in
+	 * and when that response arrives, displayPlayer(player) will be invoked on it 
+	 * 
+	 * Currently only supports one view but in future could be extended to iterate through a collection
+	 * 
 	 * @param playerDisplayer1
 	 */
 	public GetPlayerCallbackHandler(PlayerDisplayer playerDisplayer1) {

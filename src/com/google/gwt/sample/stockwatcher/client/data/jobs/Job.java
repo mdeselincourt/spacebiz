@@ -30,19 +30,14 @@ public class Job implements Serializable {
 		switch (e) { 
 			case MILK_RUN:
 				j.setDescription("Earth Orbital Courier");
-				j.setPay(1.00);
+				//j.setPay(1.0);
 				j.setDuration(1);
-				s = new CardSet();
-				s.add(new Card());
+				CardSet s = new CardSet();
+				//s.add(new Card());
 				
 				break;
 			
 		}
-		
-		return j;
-				
-				return new Job()
-				
 		
 	}
 

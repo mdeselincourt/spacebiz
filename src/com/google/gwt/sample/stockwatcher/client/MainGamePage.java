@@ -1,15 +1,21 @@
 package com.google.gwt.sample.stockwatcher.client;
 
+import java.util.HashMap;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.mortbay.log.Log;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.sample.stockwatcher.client.data.Holding;
 import com.google.gwt.sample.stockwatcher.client.data.Player;
+import com.google.gwt.sample.stockwatcher.client.data.Rowable;
 import com.google.gwt.sample.stockwatcher.client.services.PlayerService;
 import com.google.gwt.sample.stockwatcher.client.services.PlayerServiceAsync;
+import com.google.gwt.sample.stockwatcher.client.ui.CleverGrid;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -32,6 +38,7 @@ public class MainGamePage extends Content implements PlayerDisplayer {
 	Hyperlink joinLink;
 	Hyperlink marketLink;
 	Label devNotesLabel;
+	CleverGrid holdingsGrid;
 	// Properties of the player's Player.User
 	String gaeUserEmail; // a GAE User property referenced by Player
 	String userHandle; // likewise 
@@ -59,6 +66,7 @@ public class MainGamePage extends Content implements PlayerDisplayer {
 		pageRootPanel.add(manualLink);
 		pageRootPanel.add(marketLink);
 		pageRootPanel.add(devNotesLabel);
+	    pageRootPanel.add(holdingsGrid);
 		
 		// Now the page is ready, run the logic to make sure the content is right before we draw it
 		// 19-9-2016 For some reason this is getting called twice which is odd since it's my own method and not a standard part of GWT...
@@ -86,90 +94,20 @@ public class MainGamePage extends Content implements PlayerDisplayer {
 	 */
 	private void adaptToUserState() {
 		
-		logger.info("HomePage.adaptToUserState() executing");
+		logger.info(this.getClass().getName() + ".adaptToUserState() executing");
 		
 		// 1. Initialise the service proxy
 		if (playerServiceAsync == null) {
 			playerServiceAsync = GWT.create(PlayerService.class);
 		}
 		
-		// 2. Set up a callback object
+		// 2. Set up a callback object to call displayPlayer() when ready
 		AsyncCallback<Player> playerCallback = new GetPlayerCallbackHandler(this);
 		
 		// 3. Call the service
-		logger.info("HomePage.adaptToUserState(): Calling GETUserPlayer() method");
+		logger.info(this.getClass().getName() + ".adaptToUserState(): Calling GETUserPlayer() method");
 		playerServiceAsync.getUserPlayer(playerCallback);
-		
-//		TODO: OLDER, WORKING IMPLEMENTATION OF THE SERVICE HANDLING FOLLOWS! REMOVE IF NEW IMPL IS WORKING
-//
-//		// PART ONE - GET THE PLAYER DATA FROM THE SERVER
-//		
-//		// 1. Initialise the service proxy
-//		if (playerServiceAsync == null) {
-//			playerServiceAsync = GWT.create(PlayerService.class);
-//		}
-//		
-//		// Get a reference to ourself so we can put it in our anonymous inner callback 
-//		// object. 
-//		PlayerDisplayer homepage = this;
-//		
-//		// 2. Set up the callback object (GWT standard, but uses generics for my stuff)
-//		// !!! This callback object defines what to do when the get player information call completes !!!
-//		AsyncCallback<Player> playerCallback = new AsyncCallback<Player>() {
-//			
-//			// Start a logger
-//			Logger logger = Logger.getLogger(HomePage.class.toString());
-//					
-//			// 2.a() react to failures
-//			public void onFailure(Throwable exception) {
-//				logger.log(Level.SEVERE, "Callback: Failure returned by the Player.getUserPlayer() service!");
-//				
-//				logger.log(Level.SEVERE, "Exception messge = " + exception.getMessage());
-//			}
-//
-//			// 2.b() react to success of the service call. ***
-//			public void onSuccess(Player player) {
-//				
-//				/** 
-//				 * Upon success, call back to the "parent" page with the results.
-//				 */
-//				homepage.displayPlayer(player); 
-//				
-//  				logger.log(Level.INFO, "Callback: Success returned by the Player.getUserPlayer() service!");
-// 
-//				Response handling code moved out, in theory, to homepage.displayPlayer()
-//  			Preserved during testing
-//  				
-//				if (player == null) {
-//					// We found no player!
-//					logger.log(Level.INFO, "adaptToUserState().anonymous-callback-handler: Player search returned null - there isn't one");
-//					
-//					gaeUserEmail = "unidentified user";
-//					
-//					userGreetingLabel.setText("Welcome, '" + gaeUserEmail + "'");
-//					joinLink.setText(StringLiterals.NEW_PLAYER);
-//					joinLink.setTargetHistoryToken("found!newplayer");
-//				}
-//				else
-//				{
-//					// Yes we found a player
-//					gaeUserEmail = player.getGaeUserEmail();
-//					userHandle = player.getHandle();
-//					logger.log(Level.INFO, "Player service returned Player with User with email " + gaeUserEmail + " and handle " + userHandle);
-//					
-//					userGreetingLabel.setText("Welcome, '" + userHandle + "' (" + gaeUserEmail + ")");
-//					joinLink.setText(StringLiterals.RESUME_GAME);
-//				}
-//			}
-//			
-//		}; // End of inline AsyncCallback
-//		
-//		logger.info("HomePage.adaptToUserState() Calling getUserPlayer() method");
-//		
-//		// 3. Call the service, by calling the method on the class that "proxies" the service
-//		playerServiceAsync.getUserPlayer(playerCallback);
-//		
-//		// REMEMBER: This is async, the code that subsequently fires is ABOVE.
+
 	}
 
 	/**
@@ -212,6 +150,17 @@ public class MainGamePage extends Content implements PlayerDisplayer {
 			userGreetingLabel.setText("¿¿¿Welcome, '" + userHandle + "' (" + gaeUserEmail + ")");
 			joinLink.setText(StringLiterals.RESUME_GAME);
 			joinLink.setTargetHistoryToken("maingamepage");
+			
+			
+			//// Show portfolio with valuation !
+			
+			// Get holdings
+			HashMap<String,Holding> holdings = player.getHoldings();
+			
+			refreshWorld();
+			
+			// Can't use this because it's generic and I have price calculation to do?
+			// holdingsGrid.gridifyVector(v); 
 		}
 		
 	}
@@ -233,5 +182,12 @@ public class MainGamePage extends Content implements PlayerDisplayer {
 		manualLink = new Hyperlink("¿¿¿-MANUAL-", "manual");
 		marketLink = new Hyperlink("¿¿¿-MARKET (test!!)-", "market"); // TODO: This is a test!
 		devNotesLabel = new Label("¿¿¿DEV NOTES: THIS IS DUMMY CODE BORROW FROM HOMEPAGE");
+		
+		// Create a grid
+		holdingsGrid = new CleverGrid(3,4);
+
+
+	    // You can use the CellFormatter to affect the layout of the grid's cells.
+	    // e.g. holdingsGrid.getCellFormatter().setWidth(0, 2, "256px");
 	}
 }

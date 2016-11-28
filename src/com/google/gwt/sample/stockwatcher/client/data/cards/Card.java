@@ -8,7 +8,7 @@ import java.util.Map;
 public class Card {
 	
 	//private static final long serialVersionUID = 1866560258328829065L;
-
+	
 	private String name;
 	private Map<CardVal, Integer> effects;
 	
@@ -32,8 +32,6 @@ public class Card {
 		this.effects = effects;
 	}
 	
-	public enum cardExemplars  { NOTHING_HAPPENS };
-	
 	/**
 	 * Empty constructor (to easier support serialization)
 	 */
@@ -43,18 +41,17 @@ public class Card {
 	
 	/**
 	 * Exemplar constructor - will return an instance that you choose
-	 * by passing an option from the enumeration Card.cardExemplars; 
+	 * by passing an option from the enumeration CardType; 
 	 * 
-	 * @param e
+	 * @param c
 	 */
-	public Card(cardExemplars e) {
+	public Card(CardType c) {
 		
-		switch (e) {
+		switch (c) {
 			
-			case NOTHING_HAPPENS:
+			case NOTHING:
 				name = "Nothing happens";
 				effects = new EnumMap<CardVal, Integer>(CardVal.class);
-				// Its effects are empty!
 				break;
 				
 			default:
