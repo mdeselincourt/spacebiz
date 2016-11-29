@@ -41,8 +41,7 @@ public class Vessel {
 		this.speed = twr; // Dirty
 		this.thrust = mass * twr;
 		this.emits = this.thrust;
-		
-		log.info(name + " mass = " + mass);
+		log.info(name + " thrust & emit = " + this.thrust);
 		
 		this.reflectionArea = Math.pow(mass, 2/3); // Assuming 1 face of a cube
 		
@@ -73,11 +72,11 @@ public class Vessel {
 		
 		double volume = mass / density; 
 		
-		log.info(name + " volume = " + volume);
+		//log.info(name + " volume = " + volume);
 		
 		double edge = Math.cbrt(volume);
 		
-		log.info(name + " edge = " + edge);
+		//log.info(name + " edge = " + edge);
 		
 		this.detectionThreshold = detectionThreshold;
 		this.radarAmplitude = radarAmplitude;
