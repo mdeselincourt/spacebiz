@@ -7,23 +7,43 @@ public class Vessel {
 
 	private static final Logger log = Logger.getLogger(Vessel.class.getName());
 	
+	public String name;
+
+	// Physical attributes
+	public double mass;
+	public double reflectionArea;
+	public double emits;
+	
+	public double twr;
+	public double speed;
+	public double thrust;
+	
+	// Detection equipment
+	public double detectionThreshold;
+	public double radarAmplitude;
+	public double radarWavelength;
+	public double power;
+	
 	/**
 	 * Radar amplitude is going to need to be high because even at a "short" 1m wavelength it's going to need to be
 	 * 4x as powerful as a ship's natural emissions even to match passive sensors.
 	 * 
 	 * Current default detection is 0.0001 which can passively detect a small ship at 11km
 	 */
-	public Vessel(String name, double mass, double detectionThreshold, double radarAmplitude,
+	public Vessel(String name, double mass, double twr, double detectionThreshold, double radarAmplitude,
 			double radarWavelength) {
 		
 		super();
 		
 		this.name = name;
 		this.mass = mass;
+		this.twr = twr;
+		this.speed = twr; // Dirty
+		this.thrust = mass * twr;
+		this.emits = this.thrust;
 		
 		log.info(name + " mass = " + mass);
 		
-		this.emits = mass; // Assuming power output is proportional to mass
 		this.reflectionArea = Math.pow(mass, 2/3); // Assuming 1 face of a cube
 		
 		double density = 300; // 300 kg per m^3 is denser than a fully laden lunar CSM yet still easily floats 
@@ -66,18 +86,6 @@ public class Vessel {
 	}
 
 
-	public String name;
-
-	// Physical attributes
-	public double mass;
-	public double reflectionArea;
-	public double emits;
 	
-	
-	// Detection equipment
-	public double detectionThreshold;
-	public double radarAmplitude;
-	public double radarWavelength;
-	public double power;
 
 }
