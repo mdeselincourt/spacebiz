@@ -231,11 +231,11 @@ public class Encounter {
 			long timeToRendezvous = Math.round(Math.ceil(separation / parting)); 
 			interrupt = timeToRendezvous;
 			anotherTick = true;
-			log.info("T" + (elapsed - incidentStart) + "Vessels converging");
+			log.info("E" + (elapsed) + "Vessels converging");
 		}
 		else
 		{
-			log.info("T" + (elapsed - incidentStart) + "Vessels not converging");
+			log.info("E" + (elapsed) + "Vessels not converging");
 		}
 		
 		// End tick
@@ -302,7 +302,7 @@ public class Encounter {
 		// Passive detection
 		double aPassiveDetectBDistance = Math.sqrt(b.emits/a.detectionThreshold);
 		
-		log.info("'hears' opponent at range " + aPassiveDetectBDistance);
+		//log.info("'hears' opponent at range " + aPassiveDetectBDistance);
 		
 		// Active detection
 		double aReflection = Math.min(a.reflectionArea/b.radarWavelength, 1);
@@ -311,12 +311,12 @@ public class Encounter {
 		// Note that it's based on power not amplitude, hence the benefit of lower w/ls for the same amp 
 		double aActiveDetectBDistance = 0.5 * Math.sqrt((a.power * aReflection) / a.detectionThreshold);
 
-		log.info("'sees' opponent at range " + aActiveDetectBDistance);
+		//log.info("'sees' opponent at range " + aActiveDetectBDistance);
 		
 		// Passive-of-active detection
 		double aPassiveDetectBRadarDistance = Math.sqrt(b.power/a.detectionThreshold);
 		
-		log.info("'hears' opponent's RADAR at " + aPassiveDetectBRadarDistance);
+		//log.info("'hears' opponent's RADAR at " + aPassiveDetectBRadarDistance);
 		
 		double passiveRange = Math.max(aPassiveDetectBDistance, aActiveDetectBDistance);
 		double range = Math.max(passiveRange, aPassiveDetectBRadarDistance);
@@ -324,6 +324,4 @@ public class Encounter {
 		return range;
 	}
 
-	
-	
 }
