@@ -3,12 +3,21 @@ package com.google.gwt.sample.stockwatcher.server.engine;
 import java.util.Vector;
 import java.util.logging.Logger;
 
+import com.google.gwt.sample.stockwatcher.server.engine.Encounter.Threshold;
 import com.google.gwt.sample.stockwatcher.server.engine.data.AIState;
 import com.google.gwt.sample.stockwatcher.server.engine.data.Mission;
+import com.google.gwt.sample.stockwatcher.server.engine.data.Sensor;
+import com.google.gwt.sample.stockwatcher.server.engine.data.SensorType;
 import com.google.gwt.sample.stockwatcher.server.engine.data.Stance;
 import com.google.gwt.sample.stockwatcher.server.engine.data.Vessel;
 
 public class Encounter {
+
+	// Inner data class for tracking radar thresholds
+	public class Threshold {
+		public double radius; //Radius in distance (so, relative) 
+		public SensorType sensorType; // ACTIVE or PASSIVE, because that information might be useful...
+	}
 
 	private static final Logger log = Logger.getLogger(Encounter.class.getName());
 
@@ -20,7 +29,9 @@ public class Encounter {
 	Vector<String> encounterLog = new Vector<String>();
 	
 	// Encounter simulation data
-	double separation = 100000;
+	//double aPosition = -1000000.0;
+	//double bPosition = 1000000.0;
+	double separation = 1000000.0;
 	
 	double parting = 0.0; // Speed moving apart
 	
@@ -82,6 +93,9 @@ public class Encounter {
 		
 		// STARTING DISPOSITIONS
 		// The two vessels start unwittingly closing at 0.7 ( close to 1/sqrt(2) ) of their combined speeds
+		
+		//aPosition = -1000000.0;
+		//bPosition = 1000000.0;
 		separation = 1000000.0;
 		
 		aCourse = -(0.7 * a.speed); // Closing on a diagonal
@@ -90,6 +104,32 @@ public class Encounter {
 		parting = aCourse + bCourse;
 		
 		elapsed = 0;
+		
+		// Build semi-static factors
+		// Ships' visibility to each other will be semi-static
+		
+		// For each side
+			// For each ship
+				// Add a contact profile for that ship to that side if there isn't a matching profile already on that side
+		
+				// For each sensor
+					// Add a sensor profile for that sensor if there isn't a matching profile already
+		
+		// You now have semi-static tables of contact profiles and sensor profiles
+		
+		// For each side
+			// For each contact profile
+				// For each ENEMY sensor profile
+					// Calculate the threshold
+		
+		// THEN:
+		
+		// For each ship
+			// For each RELEVANT sensing body 
+				// Look up the thresholds (THRESHOLDS<OurShip><OpponentProfile>) and find the next one we'll cross
+		
+		// BUT I RECKON I CAN GET AWAY WITH OMITTING PROFILES AS AN OPTIMISATION FOR NOW
+		
 		
 		boolean simulationContinues = true;
 		
@@ -323,5 +363,5 @@ public class Encounter {
 		
 		return range;
 	}
-
+	
 }

@@ -7,23 +7,111 @@ public class Vessel {
 
 	private static final Logger log = Logger.getLogger(Vessel.class.getName());
 	
-	public String name;
+	private String name;
 
 	// Physical attributes
-	public double mass;
-	public double reflectionArea;
-	public double emits;
+	private double mass;
+	private double reflectionArea;
+	private double emits;
 	
-	public double twr;
-	public double speed;
-	public double thrust;
+	private double twr;
+	private double speed;
+	private double thrust;
 	
 	// Detection equipment
-	public double detectionThreshold;
-	public double radarAmplitude;
-	public double radarWavelength;
-	public double power;
+	private double detectionThreshold;
+	private double radarAmplitude;
+	private double radarWavelength;
+	private double power;
 	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public double getMass() {
+		return mass;
+	}
+
+	public void setMass(double mass) {
+		this.mass = mass;
+	}
+
+	public double getReflectionArea() {
+		return reflectionArea;
+	}
+
+	public void setReflectionArea(double reflectionArea) {
+		this.reflectionArea = reflectionArea;
+	}
+
+	public double getEmits() {
+		return emits;
+	}
+
+	public void setEmits(double emits) {
+		this.emits = emits;
+	}
+
+	public double getTwr() {
+		return twr;
+	}
+
+	public void setTwr(double twr) {
+		this.twr = twr;
+	}
+
+	public double getSpeed() {
+		return speed;
+	}
+
+	public void setSpeed(double speed) {
+		this.speed = speed;
+	}
+
+	public double getThrust() {
+		return thrust;
+	}
+
+	public void setThrust(double thrust) {
+		this.thrust = thrust;
+	}
+
+	public double getDetectionThreshold() {
+		return detectionThreshold;
+	}
+
+	public void setDetectionThreshold(double detectionThreshold) {
+		this.detectionThreshold = detectionThreshold;
+	}
+
+	public double getRadarAmplitude() {
+		return radarAmplitude;
+	}
+
+	public void setRadarAmplitude(double radarAmplitude) {
+		this.radarAmplitude = radarAmplitude;
+	}
+
+	public double getRadarWavelength() {
+		return radarWavelength;
+	}
+
+	public void setRadarWavelength(double radarWavelength) {
+		this.radarWavelength = radarWavelength;
+	}
+
+	public double getPower() {
+		return power;
+	}
+
+	public void setPower(double power) {
+		this.power = power;
+	}
+
 	/**
 	 * Radar amplitude is going to need to be high because even at a "short" 1m wavelength it's going to need to be
 	 * 4x as powerful as a ship's natural emissions even to match passive sensors.
