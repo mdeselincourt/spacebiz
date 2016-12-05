@@ -1,5 +1,6 @@
 package com.google.gwt.sample.stockwatcher.server.engine;
 
+import java.util.LinkedList;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -29,9 +30,9 @@ public class Encounter {
 	
 	long elapsed = 0; // Simulation-objective clock
 	long incidentStart = -1; // Offset for participant-subjective clock; -1 means not set yet
-	long interrupt = 0; // Using long because we will be converting from 'double's 
+	long interrupt = 0; // Using long because we will be converting from double-s 
 	
-	int tickLimit = 3;
+	int tickLimit = 3; // Safety timer to manage infinite loops
 	
 	// Awareness globals...
 	boolean aSeesB;
@@ -77,6 +78,7 @@ public class Encounter {
 				
 		log.info("run()");
 		
+		// Load up globals for ease of access (TODO: lazy)
 		a = missionA.getVessel();
 		b = missionB.getVessel();
 		
@@ -98,7 +100,7 @@ public class Encounter {
 			simulationContinues = tick();
 		}
 		
-		log.info("Ending run() of encounter");
+		log.info("Ending run() of encounter with " + tickLimit + " tick-limit left");
 		
 		System.out.print(encounterLog.toString());
 	}
@@ -111,13 +113,16 @@ public class Encounter {
 	 * It is NOT intended to save the need to re-evaluate the game state each time.
 	 * The assumption should be that the entire game state is re-evaluated every interrupt UNLESS
 	 * some exception applies.
+	 * 
+	 * That's the POINT of interrupts - that you only re-evaluate when you determined 
+	 * it would be useful to do so.
 	 */
 	private boolean tick() {
 		
-		log.info("tick() #" + tickLimit);
+		log.info("tick(), " + tickLimit + " left");
 		
-		// Flag for whether simulation needs to continue
-		boolean anotherTick = false;
+		// Decrement timer and assess
+		boolean anotherTick = true; // The safety control in Run() will protect us 
 		
 		/////////////////////////////
 		// Update simulation state //
@@ -125,7 +130,7 @@ public class Encounter {
 		
 		// Update the missions' positions
 		parting = aCourse + bCourse;
-		separation = separation + (parting * interrupt);
+		separation = separation + (parting * interrupt); // Update by delta
 
 		log.info("New separation = " + separation);
 		
@@ -141,102 +146,187 @@ public class Encounter {
 		// Reset interrupt 'timer'
 		interrupt = 0;
 		
-		/////////////////////////////
-		// What do the fleets KNOW //
-		/////////////////////////////
+		//////////////////////////////////////////////////////////
+		// What do the fleets KNOW *and* when will that CHANGE? //
+		//////////////////////////////////////////////////////////
 		
-		boolean bothWandering = (missionA.getAiState() == AIState.WANDERING && missionB.getAiState() == AIState.WANDERING);
+		// ???????????????????????????????????????
+		//         ??????????????? ? ????????????????????? ???????????????
+		//    ??????????????? you can't calculate thresholds until you know ????????????????
+		//  ??????????? your course and that's determined by decisions! ??????????????
+		//       ?????????????????????????????????????????????????????????????
+		//
+		// So it has to be
+		//
+		// 1. Evaluate knowledge
+		// 2. Make decisions & any changes
+		// 3. Recalculate thresholds once everything is settled
+
+		//TODO: This is a temporary measure eventually to replace a and b  
+		Vessel[] vessels = new Vessel[2];
+		vessels[0] = a;
+		vessels[1] = b;
 		
-		// Determine their contact ranges (contact() evaluates both active and passive) 
-		double fcDistA = contact(a, b);
-		double fcDistB = contact(b, a);
-		
-		log.info("fcDists: " + fcDistA + "," + fcDistB);
-		
-		// Interpret the data; can they see each other?
-		aSeesB = (fcDistA >= separation);
-		bSeesA = (fcDistB >= separation);
-		log.info("sees: " + aSeesB + "," + bSeesA);
-		
-		if (bothWandering) {
-			// We are in pre-contact
+		for (int i = 0; i < vessels.length; i++) {
 			
-			log.info("Both missions are wandering");
+			log.info("Processing vessel " + i);
 			
-			if (!(aSeesB || bSeesA)) {
-				// Neither sees the other
+			// TODO: This is fake
+			double[] fakeThresholds = new double[]{5000.0, 1000.0, 0};
+			log.warning("Placeholder implementation: fakeThresholds");
 			
-				log.info("Both missions are wandering and do not see each other");
+			double dist = separation; // TODO This in future might need to be re-calculated
+			log.warning("Placeholder: Separation is not calculated here");
+			
+			// Thing to do is probably convert sign so +ve = "forwards in time"
+			// and 0 = "where I am now"
+			// then search in order
+			
+			// That probably means 1) get distance 2) invert sign if going backwards
+			
+			double timeToNextThreshold = 1000000.0;
+			
+			for (int j = 0; j < fakeThresholds.length; j++) {
 				
-				// Reassert a "coincidental" collision course to avoid infinite loop 
-				aCourse = -0.7 * a.speed;
-				bCourse = -0.7 * b.speed;
-				parting = aCourse + bCourse;
+				log.info("Considering threshold " + j + " (" + fakeThresholds[j] + ")");
 				
-				// Calculate first contact time
-				double fcDistMax = Math.max(fcDistA, fcDistB);
-				double fcDistLeft = separation - fcDistMax; 
-				double fcTimeLeft = fcDistLeft / -parting;
+				// 1. get relative position
+				double relativePosition = separation - fakeThresholds[j];
 				
-				log.info("fcDistMax = " + fcDistMax + ", fcDistLeft = " + fcDistLeft + ", fcTimeLeft = " + fcTimeLeft);
-				
-				// Set interrupt for first contact (rounding up)
-				// Yes you need this, ceil is an arithmetic not a type operation
-				interrupt = Math.round(Math.ceil(fcTimeLeft));
-				
-				// No point assessing the rest of the game state since in theory there should be nothing else
-				return true;
-			}
-			else
-			{
-				// At least one mission sees the other
-				log.info("At least one mission sees the other");
-				
-				// If first time, log it
-				if (incidentStart == -1) {
-					incidentStart = elapsed;
-					if (aSeesB) {
-						encounterLog.add("E" + (elapsed) + a.name + " detected " + b.name + " at elapsed " + elapsed);
-					}
-					if (bSeesA) {
-						encounterLog.add("E" + (elapsed) + b.name + " detected " + a.name + " at elapsed " + elapsed);
-					}
+				// 2. flip sign if necessary because we are going backwards
+				if (vessels[i].getCourse() < 0 ) {
+					log.info("We are going backwards...");
+					relativePosition = -relativePosition;
 				}
 				
+				// 3. update "high score" (low score) if appropriate
+				double candidateTime = relativePosition / (vessels[i].getCourse()) ;
 				
-				// Make AI decisions
-				think();
-			}
+				log.info("Is " + candidateTime + " lower than " + timeToNextThreshold + "?");
+				
+				if (candidateTime < timeToNextThreshold)
+				{
+					log.info("This threshold is closer!");
+					timeToNextThreshold = candidateTime;
+				}
+								
+			}// end of loop through thresholds
+		}// end of loop through vessels
 		
-		}
+		// OLDER CODE TO PILLAGE
 		
-		// What's the next event?
-		
-		// Vessels arrived in close proximity?
-		
-		if (separation < 1000)
-		{
-			log.info("Separation = " + separation + " currently that's game over.");
-			
-			return false;
-		}
-		
-		// Vessels closing/in successful pursuit?
-		parting = aCourse + bCourse;
-		
-		log.info("Parting now = " + parting);
-		
-		if (parting < 0) { 
-			
-			long timeToRendezvous = Math.round(Math.ceil(separation / parting)); 
-			interrupt = timeToRendezvous;
-			anotherTick = true;
-			log.info("E" + (elapsed) + "Vessels converging");
-		}
-		else
-		{
-			log.info("E" + (elapsed) + "Vessels not converging");
-		}
+//		boolean bothWandering = (missionA.getAiState() == AIState.WANDERING && missionB.getAiState() == AIState.WANDERING);
+//		
+//		// Determine their contact ranges (contact() evaluates both active and passive) 
+//		double fcDistA = contact(a, b);
+//		double fcDistB = contact(b, a);
+//		
+//		log.info("fcDists: " + fcDistA + "," + fcDistB);
+//		
+//		// Interpret the data; can they see each other?
+//		aSeesB = (fcDistA >= separation);
+//		bSeesA = (fcDistB >= separation);
+//		log.info("sees: " + aSeesB + "," + bSeesA);
+//		
+//		if (bothWandering) {
+//			// We are in pre-contact
+//			
+//			log.info("Both missions are wandering");
+//			
+//			if (!(aSeesB || bSeesA)) {
+//				// Neither sees the other
+//			
+//				log.info("Both missions are wandering and do not see each other");
+//				
+//				// Reassert a "coincidental" collision course to avoid infinite loop 
+//				aCourse = -0.7 * a.speed;
+//				bCourse = -0.7 * b.speed;
+//				parting = aCourse + bCourse;
+//				
+//				// Calculate first contact time
+//				double fcDistMax = Math.max(fcDistA, fcDistB);
+//				double fcDistLeft = separation - fcDistMax; 
+//				double fcTimeLeft = fcDistLeft / -parting;
+//				
+//				log.info("fcDistMax = " + fcDistMax + ", fcDistLeft = " + fcDistLeft + ", fcTimeLeft = " + fcTimeLeft);
+//				
+//				// Set interrupt for first contact (rounding up)
+//				// Yes you need this, ceil is an arithmetic not a type operation
+//				interrupt = Math.round(Math.ceil(fcTimeLeft));
+//				
+//				// No point assessing the rest of the game state since in theory there should be nothing else
+//				return true;
+//			}
+//			else
+//			{
+//				// At least one mission sees the other
+//				log.info("At least one mission sees the other");
+//				
+//				// If first time, log it
+//				if (incidentStart == -1) {
+//					incidentStart = elapsed;
+//					if (aSeesB) {
+//						encounterLog.add("E" + (elapsed) + a.name + " detected " + b.name + " at elapsed " + elapsed);
+//					}
+//					if (bSeesA) {
+//						encounterLog.add("E" + (elapsed) + b.name + " detected " + a.name + " at elapsed " + elapsed);
+//					}
+//				}
+//				
+//				
+//				// Make AI decisions
+//				think();
+//				
+//				// Need to recalculate thresholds
+//				
+//				// Vessels may be parting or closing!
+//				
+//				// Need to find next relevant band
+//				
+//				// But that's hard because all your code is custom
+//				
+//				// Here we are inside a relevant band and could be parting or closing
+//				//  depending on AI decisions, speeds, etc.
+//				
+//				// So this is where we need code that searches for thresholds,
+//				//  in RELATIVE terms, working out which direction of RELATIVE
+//				//  travel is appropriate
+//				
+//				double aThreshold = nextThreshold(a, b);
+//				double bThreshold = nextThreshold(b, a);
+//				
+//				interrupt = Math.round(Math.ceil(Math.min(aThreshold, bThreshold)));
+//			}
+//		
+//		}
+//		
+//		// What's the next event?
+//		
+//		// Vessels arrived in close proximity?
+//		
+//		if (separation < 1000)
+//		{
+//			log.info("Separation = " + separation + " currently that's game over.");
+//			
+//			return false;
+//		}
+//		
+//		// Vessels closing/in successful pursuit?
+//		parting = aCourse + bCourse;
+//		
+//		log.info("Parting now = " + parting);
+//		
+//		if (parting < 0) { 
+//			
+//			long timeToRendezvous = Math.round(Math.ceil(separation / parting)); 
+//			interrupt = timeToRendezvous;
+//			anotherTick = true;
+//			log.info("E" + (elapsed) + "Vessels converging");
+//		}
+//		else
+//		{
+//			log.info("E" + (elapsed) + "Vessels not converging");
+//		}
 		
 		// End tick
 		return anotherTick;
@@ -251,7 +341,6 @@ public class Encounter {
 			
 			// 1. Set course
 			switch (missionA.getStance()) {
-			
 				case PURSUE:
 					missionA.setAiState(AIState.INTERCEPTING);
 					aCourse = -a.speed; // Full speed towards target!

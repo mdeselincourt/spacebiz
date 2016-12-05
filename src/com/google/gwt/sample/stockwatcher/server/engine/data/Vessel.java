@@ -3,13 +3,13 @@ import java.util.logging.Logger;
 
 import com.google.gwt.sample.stockwatcher.server.engine.Encounter;
 
-public class Vessel {
+public class Vessel implements SpaceObject {
 
 	private static final Logger log = Logger.getLogger(Vessel.class.getName());
 	
 	public String name;
 
-	// Physical attributes
+	// Semi-static physical attributes
 	public double mass;
 	public double reflectionArea;
 	public double emits;
@@ -17,6 +17,12 @@ public class Vessel {
 	public double twr;
 	public double speed;
 	public double thrust;
+	
+	// Mental state
+	private VesselMindState mindState;
+	
+	// Actual current 1D vector during an encounter
+	private double course;
 	
 	// Detection equipment
 	public double detectionThreshold;
@@ -84,6 +90,15 @@ public class Vessel {
 		this.power = radarAmplitude/radarWavelength;
 	}
 
+	@Override
+	public double getCourse() {
+		return course;
+	}
+
+	@Override
+	public void setCourse(double course) {
+		this.course = course;
+	}
 
 	
 

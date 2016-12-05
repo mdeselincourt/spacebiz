@@ -4,20 +4,10 @@ public class Mission {
 
 	Vessel vessel;
 	Stance stance;
-	AIState aiState;
 	
-	public Mission(Vessel v, Stance s, AIState a) {
+	public Mission(Vessel v, Stance s) {
 		vessel = v;
 		stance = s;
-		aiState = a;
-	}
-	
-	public AIState getAiState() {
-		return aiState;
-	}
-
-	public void setAiState(AIState aiState) {
-		this.aiState = aiState;
 	}
 
 	public Vessel getVessel() {
@@ -35,6 +25,5 @@ public class Mission {
 	public void setStance(Stance stance) {
 		this.stance = stance;
 	}
-
 
 }
