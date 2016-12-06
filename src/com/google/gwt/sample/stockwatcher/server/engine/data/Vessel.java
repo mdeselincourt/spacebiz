@@ -15,11 +15,14 @@ public class Vessel implements SpaceObject {
 	public double emits;
 	
 	public double twr;
-	public double speed;
+	private double topSpeed;
 	public double thrust;
 	
 	// Mental state
 	private VesselMindState mindState;
+	
+	// Physical state
+	private double x;
 	
 	// Actual current 1D vector during an encounter
 	private double course;
@@ -31,6 +34,8 @@ public class Vessel implements SpaceObject {
 	public double power;
 	
 	/**
+	 * name, mass, twr (speed), detectionThreshold, radarAmplitude, radarWavelength
+	 * 
 	 * Radar amplitude is going to need to be high because even at a "short" 1m wavelength it's going to need to be
 	 * 4x as powerful as a ship's natural emissions even to match passive sensors.
 	 * 
@@ -44,7 +49,7 @@ public class Vessel implements SpaceObject {
 		this.name = name;
 		this.mass = mass;
 		this.twr = twr;
-		this.speed = twr; // Dirty
+		this.topSpeed = twr; // Dirty
 		this.thrust = mass * twr;
 		this.emits = this.thrust;
 		log.info(name + " thrust & emit = " + this.thrust);
@@ -95,9 +100,33 @@ public class Vessel implements SpaceObject {
 		return course;
 	}
 
+	public double getTopSpeed() {
+		return topSpeed;
+	}
+
+	public void setTopSpeed(double topSpeed) {
+		this.topSpeed = topSpeed;
+	}
+
 	@Override
 	public void setCourse(double course) {
 		this.course = course;
+	}
+
+	public double getX() {
+		return x;
+	}
+
+	public void setX(double x) {
+		this.x = x;
+	}
+
+	public VesselMindState getMindState() {
+		return mindState;
+	}
+
+	public void setMindState(VesselMindState mindState) {
+		this.mindState = mindState;
 	}
 
 	

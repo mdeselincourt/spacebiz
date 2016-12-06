@@ -2,18 +2,29 @@ package com.google.gwt.sample.stockwatcher.server.engine.data;
 
 public class VesselMindState {
 
-	private AIIntention intention;
+	private boolean remembersContact; // Single value for awareness of adversary
+	private AiGoal goal; // Single value for the AI's current goal. Distinguishes "find and kill" from "kill" but not "kill with missiles" from "lure into trap" or whatever
+	private double intendedCourse; // +ve = "east" = towards second fleet
 	
-	public VesselMindState() {
-		setIntention(AIIntention.IDLE);
+	// placeholder: memory of opponent's properties/capabilities
+	
+	public boolean isRemembersContact() {
+		return remembersContact;
 	}
-
-	public AIIntention getIntention() {
-		return intention;
+	public void setRemembersContact(boolean remembersContact) {
+		this.remembersContact = remembersContact;
 	}
-
-	public void setIntention(AIIntention intention) {
-		this.intention = intention;
+	public AiGoal getGoal() {
+		return goal;
+	}
+	public void setGoal(AiGoal goal) {
+		this.goal = goal;
+	}
+	public double getIntendedCourse() {
+		return intendedCourse;
+	}
+	public void setIntendedCourse(double intendedCourse) {
+		this.intendedCourse = intendedCourse;
 	}
 	
 }
