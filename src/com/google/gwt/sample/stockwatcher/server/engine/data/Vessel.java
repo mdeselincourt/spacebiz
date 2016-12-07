@@ -9,16 +9,9 @@ public class Vessel implements SpaceObject {
 	
 	private String name;
 
-<<<<<<< HEAD
-	// Semi-static physical attributes
-	public double mass;
-	public double reflectionArea;
-	public double emits;
-	
-	public double twr;
+	// Semi-static physical attributes	
 	private double topSpeed;
-	public double thrust;
-=======
+
 	// Physical attributes
 	private double mass;
 	private double reflectionArea;
@@ -27,7 +20,6 @@ public class Vessel implements SpaceObject {
 	private double twr;
 	private double speed;
 	private double thrust;
->>>>>>> origin/master
 	
 	// Mental state
 	private VesselMindState mindState;
