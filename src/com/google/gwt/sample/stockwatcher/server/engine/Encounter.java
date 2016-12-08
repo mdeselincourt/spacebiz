@@ -9,7 +9,7 @@ import com.google.gwt.sample.stockwatcher.server.engine.Encounter.Threshold;
 import com.google.gwt.sample.stockwatcher.server.engine.data.Mission;
 import com.google.gwt.sample.stockwatcher.server.engine.data.Sensor;
 import com.google.gwt.sample.stockwatcher.server.engine.data.SensorType;
-import com.google.gwt.sample.stockwatcher.server.engine.data.Stance;
+import com.google.gwt.sample.stockwatcher.server.engine.data.StandingOrders;
 import com.google.gwt.sample.stockwatcher.server.engine.data.Vessel;
 import com.google.gwt.sample.stockwatcher.server.engine.data.VesselMindState;
 
@@ -60,11 +60,11 @@ public class Encounter {
 		
 		// 100t 100-speed ship
 		Vessel va = new Vessel("Lakon Type 9", 100000.0, 100.0, 0.001, 4000000, 1);
-		Mission mA = new Mission(va, Stance.EVADE);
+		Mission mA = new Mission(va, StandingOrders.EVADE);
 		
 		// 25t 300-speed ship
 		Vessel vb = new Vessel("Viper Mk III", 25000.0, 300.0, 0.001, 4000000, 1);
-		Mission mB = new Mission(vb, Stance.PURSUE);
+		Mission mB = new Mission(vb, StandingOrders.PURSUE);
 		
 		System.out.println(">" + mA.getVessel().toString());
 		
@@ -94,6 +94,8 @@ public class Encounter {
 		
 		vessels[0].setCourse((0.7 * vessels[0].getTopSpeed())); // As if closing on a diagonal with Y irrelevant
 		vessels[1].setCourse(-(0.7 * vessels[1].getTopSpeed())); 
+		
+		log.info("e.g. vessel 0 has top speed " + vessels[0].getTopSpeed() + " goes on course " + vessels[0].getCourse());
 		
 		elapsed = 0;
 		
@@ -166,6 +168,7 @@ public class Encounter {
 			VesselMindState mind = vessels[i].getMindState();
 			Vessel vessel = vessels[i];
 			
+			log.info(vessel.getName() + " is on course " + vessel.getCourse());
 			// Move vessel
 			vessel.setX(vessel.getX() + vessel.getCourse());
 		}
@@ -174,7 +177,21 @@ public class Encounter {
 		// II - USING WORLD, UPDATE MIND STATE //
 		/////////////////////////////////////////
 		
+		log.warning("TODO: Sensory code only supports 2 vessels");
+		double separation = Math.abs(vessels[0].getX() - vessels[1].getX());
+		
 		// II : Populate mind state by iterating through world
+		for (int i = 0; i < vessels.length; i++ ) {
+			
+			int otherShipIndex = 1 - i;
+			double sightRange = contact(vessels[i], vessels[otherShipIndex]); 
+			
+			if (sightRange > separation)
+			{
+				// Make vessel aware of the opponent.
+				vessels[i].getMindState().setRemembersContact(true);
+			}
+		}
 
 		//////////////////////////////////////////
 		// III - USING MIND, UPDATE INTENTIONS  //
@@ -188,28 +205,30 @@ public class Encounter {
 			
 			log.info(vessel.getName() + " thinking...");
 			
-			// There is no "right way" to structure this... 
+			// Figure out which way is forwards 
+			int awayFromOpponentUnitVector;
+			
+			log.warning("Orientation is currently hard-coded");
+			if (i == 0) {
+				// 0 will have started to the west (-ve) so away is -ve
+				awayFromOpponentUnitVector = -1;
+			}
+			else
+			{
+				// We must be ship 1 started east (+ve) so away is +ve
+				awayFromOpponentUnitVector = 1;
+			}
 			
 			// Does the vessel realise it's in an engagement?
 			if (mind.isRemembersContact()) {
 				// Vessel knows it is not alone
 				log.info(vessel.getName() + " knows it is not alone...");
 				
-				// Figure out which way is "forwards"
-				int awayFromOpponentUnitVector;
+				// Update goal given we know we're in an engagement
 				
-				log.warning("Orientation is currently hard-coded");
-				if (i == 0) {
-					// We will have started to the west (-ve) so away is -ve
-					awayFromOpponentUnitVector = -1;
-				}
-				else
-				{
-					// We must be ship 1 started east (+ve) so away is +ve
-					awayFromOpponentUnitVector = 1;
-				}
 				
-				// Make decision				
+				
+				// Convert goal into intentions				
 				switch (mind.getGoal())
 				{
 				case ESCAPE:
@@ -229,7 +248,7 @@ public class Encounter {
 					break;
 				default:
 					// No change
-					log.info(vessel.getName() + " apparently has no goal..?");
+					log.warning(vessel.getName() + " apparently has no goal..?");
 					break;
 				}
 				
@@ -238,6 +257,9 @@ public class Encounter {
 			{
 				// Vessel thinks it is alone
 				log.info(vessel.getName() + " thinks it is alone...");
+				
+				// Set off on what is conveniently a collision course
+				mind.setIntendedCourse(vessel.getTopSpeed() * (0.71) *  -awayFromOpponentUnitVector );
 			}
 			
 		}

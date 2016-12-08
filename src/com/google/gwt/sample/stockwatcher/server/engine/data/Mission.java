@@ -3,11 +3,11 @@ package com.google.gwt.sample.stockwatcher.server.engine.data;
 public class Mission {
 
 	Vessel vessel;
-	Stance stance;
+	StandingOrders standingOrders;
 	
-	public Mission(Vessel v, Stance s) {
+	public Mission(Vessel v, StandingOrders s) {
 		vessel = v;
-		stance = s;
+		standingOrders = s;
 	}
 
 	public Vessel getVessel() {
@@ -18,12 +18,12 @@ public class Mission {
 		this.vessel = vessel;
 	}
 
-	public Stance getStance() {
-		return stance;
+	public StandingOrders getStandingOrders() {
+		return standingOrders;
 	}
 
-	public void setStance(Stance stance) {
-		this.stance = stance;
+	public void setStandingOrders(StandingOrders stance) {
+		this.standingOrders = standingOrders;
 	}
 
 }

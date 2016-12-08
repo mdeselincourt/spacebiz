@@ -133,11 +133,12 @@ public class Vessel implements SpaceObject {
 	 * Current default detection is 0.0001 which can passively detect a small ship at 11km
 	 */
 	public Vessel(String name, double mass, double twr, double detectionThreshold, double radarAmplitude,
-			double radarWavelength) {
+			double radarWavelength, StandingOrders standingOrders) {
 		
 		super();
 		
 		this.mindState = new VesselMindState();
+		mindState.setStandingOrders(standingOrders);
 		mindState.setGoal(AiGoal.TRAVEL);
 		mindState.setIntendedCourse(0.0);
 		mindState.setRemembersContact(false);

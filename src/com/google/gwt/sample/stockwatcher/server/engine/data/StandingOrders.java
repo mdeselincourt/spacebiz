@@ -1,5 +1,5 @@
 package com.google.gwt.sample.stockwatcher.server.engine.data;
 
-public enum Stance {
+public enum StandingOrders {
 	EVADE, PURSUE
 }
