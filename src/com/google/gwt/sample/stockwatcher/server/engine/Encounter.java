@@ -41,6 +41,9 @@ public class Encounter {
 
 		this.missionA = a;
 		this.missionB = b;
+		vessels = new Vessel[2];
+		vessels[0] = a.getVessel();
+		vessels[1] = b.getVessel();
 	}
 	
 	public static void main(String[] args) {
@@ -63,6 +66,8 @@ public class Encounter {
 		Vessel vb = new Vessel("Viper Mk III", 25000.0, 300.0, 0.001, 4000000, 1);
 		Mission mB = new Mission(vb, Stance.PURSUE);
 		
+		System.out.println(">" + mA.getVessel().toString());
+		
 		Encounter e = new Encounter(mA, mB);
 		
 		e.run();
@@ -73,15 +78,19 @@ public class Encounter {
 		log.info("run()ing...");
 		
 		// Load up Encounter globals for ease of access
-		vessels[0] = missionA.getVessel();
-		vessels[1] = missionB.getVessel();
+		//vessels[0] = missionA.getVessel();
+		//vessels[1] = missionB.getVessel();
 		
 		// STARTING DISPOSITIONS
 		// The two vessels start unwittingly closing at 0.7 ( close to 1/sqrt(2) ) of their combined speeds
 		
-		// Start 20km apart
-		vessels[0].setX(-10000.0);
-		vessels[1].setX(10000.0);
+		// You should start at first contact range
+		
+		double fcRange = Math.max(contact(vessels[0], vessels[1]), contact(vessels[1], vessels[0])); 
+		
+		// Position vessels; round in favour of proximity
+		vessels[0].setX(Math.ceil(-fcRange / 2));
+		vessels[1].setX(Math.floor(fcRange / 2));
 		
 		vessels[0].setCourse((0.7 * vessels[0].getTopSpeed())); // As if closing on a diagonal with Y irrelevant
 		vessels[1].setCourse(-(0.7 * vessels[1].getTopSpeed())); 
@@ -141,13 +150,25 @@ public class Encounter {
 		// I - USING INTENTIONS, UPDATE WORLD //
 		////////////////////////////////////////
 		
+		/////////////////////////////////
 		// Ia : apply intentions to world
-		
-		// I think I will need two levels of intention 
-			// One single GOAL (e.g. flee) 
-			// And multiple intentions like order/commands
-		
+		for (int i = 0; i < vessels.length; i++ ) {
+			VesselMindState mind = vessels[i].getMindState();
+			Vessel vessel = vessels[i];
+			
+			// Change course
+			vessel.setCourse(mind.getIntendedCourse());
+		}
+			
+		/////////////////////
 		// Ib : let time pass
+		for (int i = 0; i < vessels.length; i++ ) {
+			VesselMindState mind = vessels[i].getMindState();
+			Vessel vessel = vessels[i];
+			
+			// Move vessel
+			vessel.setX(vessel.getX() + vessel.getCourse());
+		}
 		
 		/////////////////////////////////////////
 		// II - USING WORLD, UPDATE MIND STATE //
@@ -165,28 +186,50 @@ public class Encounter {
 			Vessel vessel = vessels[i];
 			VesselMindState mind = vessel.getMindState();
 			
-			// There is no "right way" to structure this.
+			log.info(vessel.getName() + " thinking...");
 			
+			// There is no "right way" to structure this... 
+			
+			// Does the vessel realise it's in an engagement?
 			if (mind.isRemembersContact()) {
 				// Vessel knows it is not alone
+				log.info(vessel.getName() + " knows it is not alone...");
 				
 				// Figure out which way is "forwards"
-				// ... oh dear
+				int awayFromOpponentUnitVector;
+				
+				log.warning("Orientation is currently hard-coded");
+				if (i == 0) {
+					// We will have started to the west (-ve) so away is -ve
+					awayFromOpponentUnitVector = -1;
+				}
+				else
+				{
+					// We must be ship 1 started east (+ve) so away is +ve
+					awayFromOpponentUnitVector = 1;
+				}
 				
 				// Make decision				
 				switch (mind.getGoal())
 				{
 				case ESCAPE:
-					
+					// Head away at top speed
+					mind.setIntendedCourse(vessel.getTopSpeed() * awayFromOpponentUnitVector);
+					log.info(vessel.getName() + " trying to escape...");
 					break;
 				case KILL:
-					
+					// Head -away (towards) at top speed
+					mind.setIntendedCourse(vessel.getTopSpeed() * -awayFromOpponentUnitVector);
+					log.info(vessel.getName() + " trying to kill...");
 					break;
 				case TRAVEL:
-					
+					// Set a normal course (which accidentally just happens to be a collision course!)
+					mind.setIntendedCourse(vessel.getTopSpeed() * (0.71) *  -awayFromOpponentUnitVector );
+					log.info(vessel.getName() + " trying to travel...");
 					break;
 				default:
-					
+					// No change
+					log.info(vessel.getName() + " apparently has no goal..?");
 					break;
 				}
 				
@@ -194,8 +237,7 @@ public class Encounter {
 			else
 			{
 				// Vessel thinks it is alone
-
-				// Idle; no changes to mind state...
+				log.info(vessel.getName() + " thinks it is alone...");
 			}
 			
 		}
@@ -257,55 +299,30 @@ public class Encounter {
 //		
 //		// End of AI decisions
 //	}
-//	
-//	private double contact(Vessel a, Vessel b) {
-//		
-//		// Passive detection
-//		double aPassiveDetectBDistance = Math.sqrt(b.emits/a.detectionThreshold);
-//		
-//		//log.info("'hears' opponent at range " + aPassiveDetectBDistance);
-//		
-//		// Active detection
-//		double aReflection = Math.min(a.reflectionArea/b.radarWavelength, 1);
-//
-//		// log.info("a reflectivity = " + aReflection);
-//		// Note that it's based on power not amplitude, hence the benefit of lower w/ls for the same amp 
-//		double aActiveDetectBDistance = 0.5 * Math.sqrt((a.power * aReflection) / a.detectionThreshold);
-//
-//		//log.info("'sees' opponent at range " + aActiveDetectBDistance);
-//		
-//		// Passive-of-active detection
-//		double aPassiveDetectBRadarDistance = Math.sqrt(b.power/a.detectionThreshold);
-//		
-//		//log.info("'hears' opponent's RADAR at " + aPassiveDetectBRadarDistance);
-//		
-//		double passiveRange = Math.max(aPassiveDetectBDistance, aActiveDetectBDistance);
-//		double range = Math.max(passiveRange, aPassiveDetectBRadarDistance);
-//		
-//		return range;
-//	}
-
 	
 	private double contact(Vessel a, Vessel b) {
+		
+		String aName = a.getName();
+		String bName = b.getName();
 		
 		// Passive detection
 		double aPassiveDetectBDistance = Math.sqrt(b.getEmits()/a.getDetectionThreshold());
 		
-		//log.info("'hears' opponent at range " + aPassiveDetectBDistance);
+		log.info(aName + " 'hears' " + bName + " at range " + aPassiveDetectBDistance);
 		
 		// Active detection
 		double aReflection = Math.min(a.getReflectionArea()/b.getRadarWavelength(), 1);
 
-		// log.info("a reflectivity = " + aReflection);
+		log.info(aName + " reflectivity = " + aReflection);
 		// Note that it's based on power not amplitude, hence the benefit of lower w/ls for the same amp 
 		double aActiveDetectBDistance = 0.5 * Math.sqrt((a.getPower() * aReflection) / a.getDetectionThreshold());
 
-		//log.info("'sees' opponent at range " + aActiveDetectBDistance);
+		log.info(aName + " 'sees' " + bName + " at range " + aActiveDetectBDistance);
 		
 		// Passive-of-active detection
 		double aPassiveDetectBRadarDistance = Math.sqrt(b.getPower()/a.getDetectionThreshold());
 		
-		//log.info("'hears' opponent's RADAR at " + aPassiveDetectBRadarDistance);
+		log.info(aName + " 'hears' " + bName + "'s RADAR at " + aPassiveDetectBRadarDistance);
 		
 		double passiveRange = Math.max(aPassiveDetectBDistance, aActiveDetectBDistance);
 		double range = Math.max(passiveRange, aPassiveDetectBRadarDistance);

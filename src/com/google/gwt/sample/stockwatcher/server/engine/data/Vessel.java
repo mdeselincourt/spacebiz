@@ -137,6 +137,11 @@ public class Vessel implements SpaceObject {
 		
 		super();
 		
+		this.mindState = new VesselMindState();
+		mindState.setGoal(AiGoal.TRAVEL);
+		mindState.setIntendedCourse(0.0);
+		mindState.setRemembersContact(false);
+		
 		this.name = name;
 		this.mass = mass;
 		this.twr = twr;
@@ -209,6 +214,7 @@ public class Vessel implements SpaceObject {
 	}
 
 	public void setX(double x) {
+		log.info("Moving vessel from " + this.x + " to " + x);
 		this.x = x;
 	}
 
