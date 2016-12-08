@@ -5,7 +5,7 @@ public class VesselMindState {
 	private boolean remembersContact; // Single value for awareness of adversary
 	private AiGoal goal; // Single value for the AI's current goal. Distinguishes "find and kill" from "kill" but not "kill with missiles" from "lure into trap" or whatever
 	private double intendedCourse; // +ve = "east" = towards second fleet
-	private StandingOrders standingOrders;
+	private AiGoal standingOrders;
 	
 	// placeholder: memory of opponent's properties/capabilities
 	
@@ -27,10 +27,10 @@ public class VesselMindState {
 	public void setIntendedCourse(double intendedCourse) {
 		this.intendedCourse = intendedCourse;
 	}
-	public StandingOrders getStandingOrders() {
+	public AiGoal getStandingOrders() {
 		return standingOrders;
 	}
-	public void setStandingOrders(StandingOrders standingOrders) {
+	public void setStandingOrders(AiGoal standingOrders) {
 		this.standingOrders = standingOrders;
 	}
 	

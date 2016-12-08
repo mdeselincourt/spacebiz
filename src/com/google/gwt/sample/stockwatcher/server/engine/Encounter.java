@@ -1,15 +1,10 @@
 package com.google.gwt.sample.stockwatcher.server.engine;
 
-import java.util.LinkedList;
 import java.util.Vector;
 import java.util.logging.Logger;
 
-import com.google.gwt.sample.stockwatcher.server.engine.Encounter.Threshold;
-
-import com.google.gwt.sample.stockwatcher.server.engine.data.Mission;
-import com.google.gwt.sample.stockwatcher.server.engine.data.Sensor;
+import com.google.gwt.sample.stockwatcher.server.engine.data.AiGoal;
 import com.google.gwt.sample.stockwatcher.server.engine.data.SensorType;
-import com.google.gwt.sample.stockwatcher.server.engine.data.StandingOrders;
 import com.google.gwt.sample.stockwatcher.server.engine.data.Vessel;
 import com.google.gwt.sample.stockwatcher.server.engine.data.VesselMindState;
 
@@ -23,8 +18,6 @@ public class Encounter {
 
 	private static final Logger log = Logger.getLogger(Encounter.class.getName());
 
-	Mission missionA;
-	Mission missionB;
 	Vessel[] vessels;
 	
 	Vector<String> encounterLog = new Vector<String>(); 
@@ -37,13 +30,8 @@ public class Encounter {
 	
 	int tickLimit = 3;
 		
-	public Encounter(Mission a, Mission b) {
-
-		this.missionA = a;
-		this.missionB = b;
-		vessels = new Vessel[2];
-		vessels[0] = a.getVessel();
-		vessels[1] = b.getVessel();
+	public Encounter(Vessel[] newVessels) {
+		vessels = newVessels;
 	}
 	
 	public static void main(String[] args) {
@@ -58,17 +46,15 @@ public class Encounter {
 		// The Lakon Type 9 cruises at 131 m/s
 		// The fastest ship in Elite is a Viper Mk III at boost at 400 m/s
 		
+		Vessel[] vs = new Vessel[2];
+		
 		// 100t 100-speed ship
-		Vessel va = new Vessel("Lakon Type 9", 100000.0, 100.0, 0.001, 4000000, 1);
-		Mission mA = new Mission(va, StandingOrders.EVADE);
+		vs[0] = new Vessel("Lakon Type 9", 100000.0, 100.0, 0.001, 4000000, 1, AiGoal.ESCAPE);
 		
 		// 25t 300-speed ship
-		Vessel vb = new Vessel("Viper Mk III", 25000.0, 300.0, 0.001, 4000000, 1);
-		Mission mB = new Mission(vb, StandingOrders.PURSUE);
+		vs[1] = new Vessel("Viper Mk III", 25000.0, 300.0, 0.001, 4000000, 1, AiGoal.KILL);
 		
-		System.out.println(">" + mA.getVessel().toString());
-		
-		Encounter e = new Encounter(mA, mB);
+		Encounter e = new Encounter(vs);
 		
 		e.run();
 	}
@@ -76,6 +62,7 @@ public class Encounter {
 	public void run() {
 				
 		log.info("run()ing...");
+		log.warning("Orientation is currently hard-coded");
 		
 		// Load up Encounter globals for ease of access
 		//vessels[0] = missionA.getVessel();
@@ -165,7 +152,7 @@ public class Encounter {
 		/////////////////////
 		// Ib : let time pass
 		for (int i = 0; i < vessels.length; i++ ) {
-			VesselMindState mind = vessels[i].getMindState();
+			//VesselMindState mind = vessels[i].getMindState();
 			Vessel vessel = vessels[i];
 			
 			log.info(vessel.getName() + " is on course " + vessel.getCourse());
@@ -173,9 +160,9 @@ public class Encounter {
 			vessel.setX(vessel.getX() + vessel.getCourse());
 		}
 		
-		/////////////////////////////////////////
-		// II - USING WORLD, UPDATE MIND STATE //
-		/////////////////////////////////////////
+		///////////////////////////////////////////////////
+		// II - USING WORLD, UPDATE MIND STATE INC GOAL? //
+		///////////////////////////////////////////////////
 		
 		log.warning("TODO: Sensory code only supports 2 vessels");
 		double separation = Math.abs(vessels[0].getX() - vessels[1].getX());
@@ -188,14 +175,22 @@ public class Encounter {
 			
 			if (sightRange > separation)
 			{
+				encounterLog.add(vessels[i].getName() + " detects " + vessels[otherShipIndex].getName());
 				// Make vessel aware of the opponent.
 				vessels[i].getMindState().setRemembersContact(true);
 			}
+			else
+			{
+				log.info(vessels[i].getName() + " can't see " + vessels[otherShipIndex].getName());
+			}
+			
 		}
+		
+		
 
-		//////////////////////////////////////////
-		// III - USING MIND, UPDATE INTENTIONS  //
-		//////////////////////////////////////////
+		/////////////////////////////////////////////////////////
+		// III - USING KNOWLEDGE, UPDATE GOALS AND INTENTIONS  //
+		/////////////////////////////////////////////////////////
 		
 		// III : Determine intentions using mind state
 		for (int i = 0; i < vessels.length; i++ ) {
@@ -205,10 +200,9 @@ public class Encounter {
 			
 			log.info(vessel.getName() + " thinking...");
 			
-			// Figure out which way is forwards 
+			// Figure out which way is forwards for use later 
 			int awayFromOpponentUnitVector;
 			
-			log.warning("Orientation is currently hard-coded");
 			if (i == 0) {
 				// 0 will have started to the west (-ve) so away is -ve
 				awayFromOpponentUnitVector = -1;
@@ -222,11 +216,17 @@ public class Encounter {
 			// Does the vessel realise it's in an engagement?
 			if (mind.isRemembersContact()) {
 				// Vessel knows it is not alone
-				log.info(vessel.getName() + " knows it is not alone...");
+				log.info(vessel.getName() + " knows it has company!");
 				
-				// Update goal given we know we're in an engagement
-				
-				
+				// Update goal GIVEN we know we're in an engagement
+				if (vessel.getMindState().getStandingOrders() == AiGoal.KILL) {
+					// Obey orders unquestioningly; kill
+					vessel.getMindState().setGoal(AiGoal.KILL);
+				}
+				if (vessel.getMindState().getStandingOrders() == AiGoal.ESCAPE) {
+					// Obey unquestioningly orders; escape
+					vessel.getMindState().setGoal(AiGoal.ESCAPE);
+				}
 				
 				// Convert goal into intentions				
 				switch (mind.getGoal())
@@ -330,24 +330,26 @@ public class Encounter {
 		// Passive detection
 		double aPassiveDetectBDistance = Math.sqrt(b.getEmits()/a.getDetectionThreshold());
 		
-		log.info(aName + " 'hears' " + bName + " at range " + aPassiveDetectBDistance);
+		//log.info(aName + " 'hears' " + bName + " at range " + aPassiveDetectBDistance);
 		
 		// Active detection
 		double aReflection = Math.min(a.getReflectionArea()/b.getRadarWavelength(), 1);
 
-		log.info(aName + " reflectivity = " + aReflection);
+		//log.info(aName + " reflectivity = " + aReflection);
 		// Note that it's based on power not amplitude, hence the benefit of lower w/ls for the same amp 
 		double aActiveDetectBDistance = 0.5 * Math.sqrt((a.getPower() * aReflection) / a.getDetectionThreshold());
 
-		log.info(aName + " 'sees' " + bName + " at range " + aActiveDetectBDistance);
+		//log.info(aName + " 'sees' " + bName + " at range " + aActiveDetectBDistance);
 		
 		// Passive-of-active detection
 		double aPassiveDetectBRadarDistance = Math.sqrt(b.getPower()/a.getDetectionThreshold());
 		
-		log.info(aName + " 'hears' " + bName + "'s RADAR at " + aPassiveDetectBRadarDistance);
+		//log.info(aName + " 'hears' " + bName + "'s RADAR at " + aPassiveDetectBRadarDistance);
 		
 		double passiveRange = Math.max(aPassiveDetectBDistance, aActiveDetectBDistance);
 		double range = Math.max(passiveRange, aPassiveDetectBRadarDistance);
+		
+		
 		
 		return range;
 	}

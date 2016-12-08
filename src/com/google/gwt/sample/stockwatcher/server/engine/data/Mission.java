@@ -3,9 +3,9 @@ package com.google.gwt.sample.stockwatcher.server.engine.data;
 public class Mission {
 
 	Vessel vessel;
-	StandingOrders standingOrders;
+	AiGoal standingOrders;
 	
-	public Mission(Vessel v, StandingOrders s) {
+	public Mission(Vessel v, AiGoal s) {
 		vessel = v;
 		standingOrders = s;
 	}
@@ -18,11 +18,11 @@ public class Mission {
 		this.vessel = vessel;
 	}
 
-	public StandingOrders getStandingOrders() {
+	public AiGoal getStandingOrders() {
 		return standingOrders;
 	}
 
-	public void setStandingOrders(StandingOrders stance) {
+	public void setStandingOrders(AiGoal stance) {
 		this.standingOrders = standingOrders;
 	}
 
