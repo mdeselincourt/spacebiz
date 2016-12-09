@@ -28,7 +28,7 @@ public class Encounter {
 	long incidentStart = -1; // Offset for participant-subjective clock; -1 means not set yet
 	long interrupt = 0; // Using long because we will be converting from 'double's 
 	
-	int tickLimit = 3;
+	int tickLimit = 40;
 		
 	public Encounter(Vessel[] newVessels) {
 		vessels = newVessels;
@@ -117,6 +117,7 @@ public class Encounter {
 		while (simulationContinues && tickLimit > 0) {
 			simulationContinues = tick();
 			tickLimit--;
+			elapsed++;
 		}
 		
 		log.info("Ending run() of encounter with " + tickLimit + " tick-limit left");
@@ -152,13 +153,35 @@ public class Encounter {
 		/////////////////////
 		// Ib : let time pass
 		for (int i = 0; i < vessels.length; i++ ) {
-			//VesselMindState mind = vessels[i].getMindState();
+			VesselMindState mind = vessels[i].getMindState();
 			Vessel vessel = vessels[i];
+			
+			Vessel opponent = vessels[1-i]; // TODO: Only supports 1 ship each side
 			
 			log.info(vessel.getName() + " is on course " + vessel.getCourse());
 			// Move vessel
 			vessel.setX(vessel.getX() + vessel.getCourse());
+			
+			// Check for an escape victory
+			AiGoal vg = mind.getGoal();
+			double vts = vessel.getTopSpeed();
+			double ots = opponent.getTopSpeed();
+			double ocr = contact(opponent,vessel);
+			double sep = Math.abs(vessel.getX() - opponent.getX());
+			
+			if(vg == AiGoal.ESCAPE && vts > ots && ocr < sep) {
+				log.info(vessel.getName() + " successfully escapes!");
+				encounterLog.add(elapsed + ": " + vessel.getName() + " successfully fled!");
+			}
+			
+			// Check for a boarding victory
+			
 		}
+		
+		/////////////////////
+		// Ic: check for world actions including resolution of encounter
+		
+
 		
 		///////////////////////////////////////////////////
 		// II - USING WORLD, UPDATE MIND STATE INC GOAL? //
@@ -175,7 +198,9 @@ public class Encounter {
 			
 			if (sightRange > separation)
 			{
-				encounterLog.add(vessels[i].getName() + " detects " + vessels[otherShipIndex].getName());
+				if (vessels[i].getMindState().isRemembersContact() == false) {
+					encounterLog.add(elapsed + ": " + vessels[i].getName() + " detects " + vessels[otherShipIndex].getName());
+				}
 				// Make vessel aware of the opponent.
 				vessels[i].getMindState().setRemembersContact(true);
 			}
@@ -219,11 +244,21 @@ public class Encounter {
 				log.info(vessel.getName() + " knows it has company!");
 				
 				// Update goal GIVEN we know we're in an engagement
-				if (vessel.getMindState().getStandingOrders() == AiGoal.KILL) {
+				if (mind.getStandingOrders() == AiGoal.KILL) {
+
+					if (mind.getGoal() != AiGoal.KILL) {
+						encounterLog.add(elapsed + ": " + vessel.getName() + " initiates an attack!");
+					}
+					
 					// Obey orders unquestioningly; kill
 					vessel.getMindState().setGoal(AiGoal.KILL);
 				}
 				if (vessel.getMindState().getStandingOrders() == AiGoal.ESCAPE) {
+					
+					if (mind.getGoal() != AiGoal.ESCAPE) {
+						encounterLog.add(elapsed + ": " + vessel.getName() + " decides to flee!");
+					}
+					
 					// Obey unquestioningly orders; escape
 					vessel.getMindState().setGoal(AiGoal.ESCAPE);
 				}
