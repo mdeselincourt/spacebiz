@@ -1,5 +1,6 @@
 package com.google.gwt.sample.stockwatcher.server.engine;
 
+import java.util.Iterator;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -28,7 +29,7 @@ public class Encounter {
 	long incidentStart = -1; // Offset for participant-subjective clock; -1 means not set yet
 	long interrupt = 0; // Using long because we will be converting from 'double's 
 	
-	int tickLimit = 40;
+	int tickLimit = 80;
 		
 	public Encounter(Vessel[] newVessels) {
 		vessels = newVessels;
@@ -63,6 +64,7 @@ public class Encounter {
 				
 		log.info("run()ing...");
 		log.warning("Orientation is currently hard-coded");
+		log.warning("TODO: Sensory code only supports 2 vessels");
 		
 		// Load up Encounter globals for ease of access
 		//vessels[0] = missionA.getVessel();
@@ -115,14 +117,19 @@ public class Encounter {
 		boolean simulationContinues = true;
 		
 		while (simulationContinues && tickLimit > 0) {
-			simulationContinues = tick();
+			int tickLength = 10; 
+			simulationContinues = tick(tickLength);
 			tickLimit--;
-			elapsed++;
+			elapsed = elapsed + tickLength;
 		}
 		
 		log.info("Ending run() of encounter with " + tickLimit + " tick-limit left");
 		
-		System.out.print(encounterLog.toString());
+		// Dump the encounter log to stdout
+		Iterator<String> it = encounterLog.iterator();
+		while(it.hasNext()) {
+			System.out.println(it.next());
+		}
 	}
 	
 	/**
@@ -130,7 +137,7 @@ public class Encounter {
 	 * 2. Using world, evaluate knowledge
 	 * 3. Using knowledge, evaluate intentions
 	 */
-	private boolean tick() {
+	private boolean tick(int tickSeconds) {
 		
 		log.info("tick(), " + tickLimit + " left");
 		
@@ -158,9 +165,10 @@ public class Encounter {
 			
 			Vessel opponent = vessels[1-i]; // TODO: Only supports 1 ship each side
 			
-			log.info(vessel.getName() + " is on course " + vessel.getCourse());
+			// log.info(vessel.getName() + " is on course " + vessel.getCourse());
 			// Move vessel
-			vessel.setX(vessel.getX() + vessel.getCourse());
+			double move = vessel.getCourse() * tickSeconds;
+			vessel.setX(vessel.getX() + move);
 			
 			// Check for an escape victory
 			AiGoal vg = mind.getGoal();
@@ -171,23 +179,29 @@ public class Encounter {
 			
 			if(vg == AiGoal.ESCAPE && vts > ots && ocr < sep) {
 				log.info(vessel.getName() + " successfully escapes!");
-				encounterLog.add(elapsed + ": " + vessel.getName() + " successfully fled!");
+				encounterLog.add("T+" + elapsed + ": " + vessel.getName() + " successfully fled!");
+				
+				anotherTick = false;
 			}
 			
 			// Check for a boarding victory
 			
+			// if trying to kill and within 5km
+			if (vg == AiGoal.KILL && sep < 5000.0) {
+				log.info(vessel.getName() + " attempts to board " + opponent.getName() + "!");
+				encounterLog.add("T+" + elapsed + ": " + vessel.getName() + " attempted to board " + opponent.getName() + "!");
+				
+				anotherTick = false;
+			}
 		}
 		
 		/////////////////////
 		// Ic: check for world actions including resolution of encounter
 		
-
-		
 		///////////////////////////////////////////////////
 		// II - USING WORLD, UPDATE MIND STATE INC GOAL? //
 		///////////////////////////////////////////////////
 		
-		log.warning("TODO: Sensory code only supports 2 vessels");
 		double separation = Math.abs(vessels[0].getX() - vessels[1].getX());
 		
 		// II : Populate mind state by iterating through world
@@ -199,14 +213,14 @@ public class Encounter {
 			if (sightRange > separation)
 			{
 				if (vessels[i].getMindState().isRemembersContact() == false) {
-					encounterLog.add(elapsed + ": " + vessels[i].getName() + " detects " + vessels[otherShipIndex].getName());
+					encounterLog.add("T+" + elapsed + ": " + vessels[i].getName() + " detects " + vessels[otherShipIndex].getName() + " at range " + separation);
 				}
 				// Make vessel aware of the opponent.
 				vessels[i].getMindState().setRemembersContact(true);
 			}
 			else
 			{
-				log.info(vessels[i].getName() + " can't see " + vessels[otherShipIndex].getName());
+				// log.info(vessels[i].getName() + " can't see " + vessels[otherShipIndex].getName());
 			}
 			
 		}
@@ -223,7 +237,7 @@ public class Encounter {
 			Vessel vessel = vessels[i];
 			VesselMindState mind = vessel.getMindState();
 			
-			log.info(vessel.getName() + " thinking...");
+			// log.info(vessel.getName() + " thinking...");
 			
 			// Figure out which way is forwards for use later 
 			int awayFromOpponentUnitVector;
@@ -241,13 +255,13 @@ public class Encounter {
 			// Does the vessel realise it's in an engagement?
 			if (mind.isRemembersContact()) {
 				// Vessel knows it is not alone
-				log.info(vessel.getName() + " knows it has company!");
+				// log.info(vessel.getName() + " knows it has company!");
 				
 				// Update goal GIVEN we know we're in an engagement
 				if (mind.getStandingOrders() == AiGoal.KILL) {
 
 					if (mind.getGoal() != AiGoal.KILL) {
-						encounterLog.add(elapsed + ": " + vessel.getName() + " initiates an attack!");
+						encounterLog.add("T+" + elapsed + ": " + vessel.getName() + " initiates an attack!");
 					}
 					
 					// Obey orders unquestioningly; kill
@@ -256,7 +270,7 @@ public class Encounter {
 				if (vessel.getMindState().getStandingOrders() == AiGoal.ESCAPE) {
 					
 					if (mind.getGoal() != AiGoal.ESCAPE) {
-						encounterLog.add(elapsed + ": " + vessel.getName() + " decides to flee!");
+						encounterLog.add("T+" + elapsed + ": " + vessel.getName() + " decides to flee!");
 					}
 					
 					// Obey unquestioningly orders; escape
@@ -269,17 +283,17 @@ public class Encounter {
 				case ESCAPE:
 					// Head away at top speed
 					mind.setIntendedCourse(vessel.getTopSpeed() * awayFromOpponentUnitVector);
-					log.info(vessel.getName() + " trying to escape...");
+					// log.info(vessel.getName() + " trying to escape...");
 					break;
 				case KILL:
 					// Head -away (towards) at top speed
 					mind.setIntendedCourse(vessel.getTopSpeed() * -awayFromOpponentUnitVector);
-					log.info(vessel.getName() + " trying to kill...");
+					// log.info(vessel.getName() + " trying to kill...");
 					break;
 				case TRAVEL:
 					// Set a normal course (which accidentally just happens to be a collision course!)
 					mind.setIntendedCourse(vessel.getTopSpeed() * (0.71) *  -awayFromOpponentUnitVector );
-					log.info(vessel.getName() + " trying to travel...");
+					// log.info(vessel.getName() + " trying to travel...");
 					break;
 				default:
 					// No change

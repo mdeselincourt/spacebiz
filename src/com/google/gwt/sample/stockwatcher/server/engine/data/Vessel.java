@@ -215,7 +215,7 @@ public class Vessel implements SpaceObject {
 	}
 
 	public void setX(double x) {
-		log.info("Moving vessel from " + this.x + " to " + x);
+		log.info("Moving " + this.name + " from " + this.x + " to " + x);
 		this.x = x;
 	}
 
