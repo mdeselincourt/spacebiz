@@ -6,6 +6,8 @@ import java.util.logging.Logger;
 
 import com.google.gwt.sample.stockwatcher.server.engine.data.AiGoal;
 import com.google.gwt.sample.stockwatcher.server.engine.data.SensorType;
+import com.google.gwt.sample.stockwatcher.server.engine.data.Signature;
+import com.google.gwt.sample.stockwatcher.server.engine.data.SignatureType;
 import com.google.gwt.sample.stockwatcher.server.engine.data.Vessel;
 import com.google.gwt.sample.stockwatcher.server.engine.data.VesselMindState;
 
@@ -208,13 +210,22 @@ public class Encounter {
 		for (int i = 0; i < vessels.length; i++ ) {
 			
 			int otherShipIndex = 1 - i;
-			double sightRange = contact(vessels[i], vessels[otherShipIndex]); 
+			double sightRange = contact(vessels[i], vessels[otherShipIndex]);
 			
-			if (sightRange > separation)
+			log.warning("Signatures code in draft");
+			Vector<Signature> signatures = scanFor(vessels[i], vessels[otherShipIndex]);
+			
+			
+			
+			// If this ship can see the other ship 
+			//if (sightRange > separation)
+			if (!signatures.isEmpty())
 			{
+				// Log if we are learning of opponent for the first time
 				if (vessels[i].getMindState().isRemembersContact() == false) {
 					encounterLog.add("T+" + elapsed + ": " + vessels[i].getName() + " detects " + vessels[otherShipIndex].getName() + " at range " + separation);
 				}
+
 				// Make vessel aware of the opponent.
 				vessels[i].getMindState().setRemembersContact(true);
 			}
@@ -371,6 +382,53 @@ public class Encounter {
 //		// End of AI decisions
 //	}
 	
+	// Determine the sensor signatures of b on a's sensors
+	private Vector<Signature> scanFor(Vessel a, Vessel b) {
+		
+		Vector<Signature> results = new Vector<Signature>();
+		
+		double sep = Math.abs(a.getX() - b.getX());
+		
+		double aPassiveDetectBDistance = Math.sqrt(b.getEmits()/a.getDetectionThreshold());
+		
+		if (aPassiveDetectBDistance > sep) {
+			results.add(new Signature(b, SignatureType.EMISSIONS, sep, 0.0, b.getEmits()));
+		}
+		
+		double bReflection = Math.min(b.getReflectionArea()/a.getRadarWavelength(), 1); 
+		double aActiveDetectBDistance = 0.5 * Math.sqrt((a.getPower() * bReflection) / a.getDetectionThreshold());
+		
+		if (aActiveDetectBDistance > sep) {
+			results.add(new Signature(b, SignatureType.OURRADAR, sep, bReflection, 0.0));
+		}
+		
+		// Passive-of-active detection
+		double aPassiveDetectBRadarDistance = Math.sqrt(b.getPower()/a.getDetectionThreshold());
+
+		if (aPassiveDetectBRadarDistance > sep) {
+			results.add(new Signature(b, SignatureType.OTHERRADAR, sep, 0.0, b.getPower()));
+		}
+		
+		return results;
+	}
+	
+	
+	// Determine the greatest distance at which a can detect b
+	/**
+	 * 
+	 * PASSIVE DETECTION:
+	 * 
+	 * SignalStrength = power/dist² (inverse square)
+	 * dist² x SignalStrength = power
+	 * dist² = power / signalstrength
+	 * dist = sqrt(power / signalStrength)
+	 * 
+	 * [²]
+	 *  
+	 * @param a
+	 * @param b
+	 * @return
+	 */
 	private double contact(Vessel a, Vessel b) {
 		
 		String aName = a.getName();
@@ -381,12 +439,12 @@ public class Encounter {
 		
 		//log.info(aName + " 'hears' " + bName + " at range " + aPassiveDetectBDistance);
 		
-		// Active detection
-		double aReflection = Math.min(a.getReflectionArea()/b.getRadarWavelength(), 1);
+		// Active detection involves the target's reflectivity
+		double bReflection = Math.min(b.getReflectionArea()/a.getRadarWavelength(), 1);
 
 		//log.info(aName + " reflectivity = " + aReflection);
 		// Note that it's based on power not amplitude, hence the benefit of lower w/ls for the same amp 
-		double aActiveDetectBDistance = 0.5 * Math.sqrt((a.getPower() * aReflection) / a.getDetectionThreshold());
+		double aActiveDetectBDistance = 0.5 * Math.sqrt((a.getPower() * bReflection) / a.getDetectionThreshold());
 
 		//log.info(aName + " 'sees' " + bName + " at range " + aActiveDetectBDistance);
 		
@@ -394,7 +452,8 @@ public class Encounter {
 		double aPassiveDetectBRadarDistance = Math.sqrt(b.getPower()/a.getDetectionThreshold());
 		
 		//log.info(aName + " 'hears' " + bName + "'s RADAR at " + aPassiveDetectBRadarDistance);
-		
+
+		// Find the highest range
 		double passiveRange = Math.max(aPassiveDetectBDistance, aActiveDetectBDistance);
 		double range = Math.max(passiveRange, aPassiveDetectBRadarDistance);
 		
