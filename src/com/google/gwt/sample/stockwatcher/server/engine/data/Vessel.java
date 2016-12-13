@@ -191,7 +191,11 @@ public class Vessel implements SpaceObject {
 		this.radarWavelength = radarWavelength;
 		this.power = radarAmplitude/radarWavelength;
 	}
-
+	
+	public enum VesselTestEnum {
+		BOAT
+	}
+	
 	@Override
 	public double getCourse() {
 		return course;
