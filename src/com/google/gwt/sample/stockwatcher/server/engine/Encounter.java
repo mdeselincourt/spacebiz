@@ -12,7 +12,7 @@ import com.google.gwt.sample.stockwatcher.server.engine.data.Vessel;
 import com.google.gwt.sample.stockwatcher.server.engine.data.VesselMindState;
 
 public class Encounter {
-
+	
 	// Inner data class for tracking radar thresholds
 	public class Threshold {
 		public double radius; //Radius in distance (so, relative) 

@@ -3,7 +3,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.sample.stockwatcher.server.engine.Encounter;
 
-public class Vessel implements SpaceObject {
+public class Vessel extends VesselClass implements SpaceObject {
 
 	private static final Logger log = Logger.getLogger(Vessel.class.getName());
 	
@@ -125,6 +125,34 @@ public class Vessel implements SpaceObject {
 	}
 
 	/**
+	 * Intended (but doesn't 
+	 * 
+	 * @param name
+	 * @param standingOrders
+	 */
+	
+	public Vessel(String name, AiGoal standingOrders, VesselClass ignoreMeForNow) {
+		
+		super(); // At time of writing the VesselClass constructor has hard-coded values
+		
+		log.warning("This constructor doesn't support choosing a class yet!");
+		
+		// Use the choice of VesselClass to instantiate this derp
+		
+		this.name = name;
+		
+		this.mindState = new VesselMindState();
+		mindState.setStandingOrders(standingOrders);
+		mindState.setGoal(AiGoal.TRAVEL);
+		mindState.setIntendedCourse(0.0);
+		mindState.setRemembersContact(false);
+		
+		log.severe("!!! ! ! Rewriting of Vessel class not complete ! ! !!!");
+		
+		// this.mass = TODO: CONTINUE FRMO HERE! 
+	}
+	
+	/**
 	 * name, mass, twr (speed), detectionThreshold, radarAmplitude, radarWavelength
 	 * 
 	 * Radar amplitude is going to need to be high because even at a "short" 1m wavelength it's going to need to be
@@ -135,7 +163,9 @@ public class Vessel implements SpaceObject {
 	public Vessel(String name, double mass, double twr, double detectionThreshold, double radarAmplitude,
 			double radarWavelength, AiGoal standingOrders) {
 		
-		super();
+		super(); // Initialise class properties
+		
+		log.warning("This constructor doesn't build the Vessel from a VesselClass so probably needs retiring");
 		
 		this.mindState = new VesselMindState();
 		mindState.setStandingOrders(standingOrders);

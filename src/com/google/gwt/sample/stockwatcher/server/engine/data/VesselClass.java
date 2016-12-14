@@ -1,26 +1,15 @@
 package com.google.gwt.sample.stockwatcher.server.engine.data;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 public class VesselClass {
 	
 	private static final Logger log = Logger.getLogger(VesselClass.class.getName());
 	
-	private VesselModule reactors[];
-	private VesselModule engines[];
-
-	private VesselModule[] habs;
-
-	private VesselModule[] fuelStores;
-
-	private VesselModule[] lifeSupports;
-
-	private VesselModule[] sensors;
-
-	private VesselModule[] commands;
-
-	private VesselModule[] stores;
-
+	private HashMap<VesselModuleType,ArrayList<VesselModule>> modulesListMap;
 	
 	public VesselClass() {
 		
@@ -45,28 +34,61 @@ public class VesselClass {
 		// => 20 tons, big for a lifeboat but that's all
 		// 16 metres long
 		
-		 reactors = new VesselModule[1];
-		 reactors[0] = new VesselModule(VesselModuleType.REACTOR, 2.0);
-		 
-		 engines = new VesselModule[1];
-		 engines[0] = new VesselModule(VesselModuleType.ENGINE, 2.0);
-		 
-		 habs = new VesselModule[1];
-		 habs[0] = new VesselModule(VesselModuleType.HABITATION, 1.0);
-		 
-		 fuelStores = new VesselModule[1];
-		 fuelStores[0] = new VesselModule(VesselModuleType.FUELSTORES, 1.0);
-		 
-		 lifeSupports = new VesselModule[1];
-		 lifeSupports[0] = new VesselModule(VesselModuleType.LIFESUPPORT, 1.0);
-		 
-		 sensors = new VesselModule[1];
-		 sensors[0] = new VesselModule(VesselModuleType.RADAR, 1.0);
-		 
-		 commands = new VesselModule[1];
-		 commands[0] = new VesselModule(VesselModuleType.COMMAND, 1.0);
-		 
-		 stores = new VesselModule[1];
-		 stores[0] = new VesselModule(VesselModuleType.STORES, 1.0);
+		ArrayList<VesselModule> reactorsList = new ArrayList<VesselModule>(
+				Arrays.asList(
+						new VesselModule(VesselModuleType.REACTOR, 2.0)
+				)
+		); 
+		
+		ArrayList<VesselModule> enginesList = new ArrayList<VesselModule>(
+				Arrays.asList(
+						new VesselModule(VesselModuleType.ENGINE, 2.0)
+				)
+		);
+		
+		ArrayList<VesselModule> habitationsList = new ArrayList<VesselModule>(
+				Arrays.asList(
+						new VesselModule(VesselModuleType.HABITATION, 1.0)
+				)
+		);
+		
+		ArrayList<VesselModule> fuelStoresList = new ArrayList<VesselModule>(
+				Arrays.asList(
+						new VesselModule(VesselModuleType.FUELSTORES, 1.0)
+				)
+		);
+		
+		ArrayList<VesselModule> lifeSupportList = new ArrayList<VesselModule>(
+				Arrays.asList(
+						new VesselModule(VesselModuleType.LIFESUPPORT, 1.0)
+				)
+		);
+		
+		ArrayList<VesselModule> radarList = new ArrayList<VesselModule>(
+				Arrays.asList(
+						new VesselModule(VesselModuleType.RADAR, 2.0)
+				)
+		);
+		
+		ArrayList<VesselModule> commandsList = new ArrayList<VesselModule>(
+				Arrays.asList(
+						new VesselModule(VesselModuleType.COMMAND, 1.0)
+				)
+		);
+		
+		ArrayList<VesselModule> storesList = new ArrayList<VesselModule>(
+				Arrays.asList(
+						new VesselModule(VesselModuleType.STORES, 1.0)
+				)
+		);
+		
+		modulesListMap.put(VesselModuleType.REACTOR, reactorsList);
+		modulesListMap.put(VesselModuleType.ENGINE, enginesList);
+		modulesListMap.put(VesselModuleType.HABITATION, habitationsList);
+		modulesListMap.put(VesselModuleType.FUELSTORES, fuelStoresList);
+		modulesListMap.put(VesselModuleType.LIFESUPPORT, lifeSupportList);
+		modulesListMap.put(VesselModuleType.RADAR, radarList);
+		modulesListMap.put(VesselModuleType.COMMAND, commandsList);
+		modulesListMap.put(VesselModuleType.STORES, storesList);	
 	}
 }
