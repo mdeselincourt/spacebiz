@@ -3,6 +3,9 @@ package com.google.gwt.sample.stockwatcher.server.engine.data;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 public class VesselClass {
@@ -10,6 +13,8 @@ public class VesselClass {
 	private static final Logger log = Logger.getLogger(VesselClass.class.getName());
 	
 	private HashMap<VesselModuleType,ArrayList<VesselModule>> modulesListMap;
+	
+	private double mass;
 	
 	public VesselClass() {
 		
@@ -33,6 +38,12 @@ public class VesselClass {
 		// = 10 tons
 		// => 20 tons, big for a lifeboat but that's all
 		// 16 metres long
+		
+		//
+		// An AIM-9 is close enough to 0.1t
+		//  We could say a hard-pt is equal mass to its capacity
+		//  We could say a reloadable launcher is ... 8x? 
+		//		4x to hold it and another 4x of retrieval? Maybe 10x is easier 
 		
 		ArrayList<VesselModule> reactorsList = new ArrayList<VesselModule>(
 				Arrays.asList(
@@ -89,6 +100,36 @@ public class VesselClass {
 		modulesListMap.put(VesselModuleType.LIFESUPPORT, lifeSupportList);
 		modulesListMap.put(VesselModuleType.RADAR, radarList);
 		modulesListMap.put(VesselModuleType.COMMAND, commandsList);
-		modulesListMap.put(VesselModuleType.STORES, storesList);	
+		modulesListMap.put(VesselModuleType.STORES, storesList);
+		
+		refreshMass();
+	}
+	
+	private double refreshMass() {
+		
+		double newMass = 0.0;
+		
+		Iterator<Entry<VesselModuleType, ArrayList<VesselModule>>> mapIterator = modulesListMap.entrySet().iterator();
+		
+		while (mapIterator.hasNext()) {
+			
+			Map.Entry<VesselModuleType, ArrayList<VesselModule>> pair = (Map.Entry<VesselModuleType, ArrayList<VesselModule>>)mapIterator.next(); 
+
+			ArrayList<VesselModule> list = pair.getValue();
+			
+			Iterator<VesselModule> listIterator = list.iterator();
+			
+			while (listIterator.hasNext()) {
+				
+				VesselModule module = listIterator.next();
+				
+				newMass = newMass + module.getMass();
+				
+			}
+		}
+		
+		// log.warning("Currently arbitrary return value");
+		mass = newMass;
+		return newMass;
 	}
 }

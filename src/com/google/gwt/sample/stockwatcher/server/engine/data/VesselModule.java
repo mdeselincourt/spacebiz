@@ -38,4 +38,44 @@ public class VesselModule {
 		}
 
 	}
+
+	public VesselModuleType getType() {
+		return type;
+	}
+
+	public void setType(VesselModuleType type) {
+		this.type = type;
+	}
+
+	public double getMass() {
+		return mass;
+	}
+
+	public void setMass(double mass) {
+		this.mass = mass;
+	}
+
+	public double getOutput() {
+		return output;
+	}
+
+	public void setOutput(double output) {
+		this.output = output;
+	}
+
+	public double getAmplitude() {
+		return amplitude;
+	}
+
+	public void setAmplitude(double amplitude) {
+		this.amplitude = amplitude;
+	}
+
+	public double getWavelength() {
+		return wavelength;
+	}
+
+	public void setWavelength(double wavelength) {
+		this.wavelength = wavelength;
+	}
 }
