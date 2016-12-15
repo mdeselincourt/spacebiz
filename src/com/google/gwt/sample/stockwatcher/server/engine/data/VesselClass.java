@@ -14,7 +14,19 @@ public class VesselClass {
 	
 	private HashMap<VesselModuleType,ArrayList<VesselModule>> modulesListMap;
 	
+	// Physical properties
 	private double mass;
+	private double reflectionArea;
+
+	private double length;
+
+	private double thrust;
+
+	private double twr;
+
+	private double topSpeed;
+
+	private double emits;
 	
 	public VesselClass() {
 		
@@ -47,49 +59,49 @@ public class VesselClass {
 		
 		ArrayList<VesselModule> reactorsList = new ArrayList<VesselModule>(
 				Arrays.asList(
-						new VesselModule(VesselModuleType.REACTOR, 2.0)
+						new VesselModule(VesselModuleType.REACTOR, 2000.0)
 				)
 		); 
 		
 		ArrayList<VesselModule> enginesList = new ArrayList<VesselModule>(
 				Arrays.asList(
-						new VesselModule(VesselModuleType.ENGINE, 2.0)
+						new VesselModule(VesselModuleType.ENGINE, 2000.0)
 				)
 		);
 		
 		ArrayList<VesselModule> habitationsList = new ArrayList<VesselModule>(
 				Arrays.asList(
-						new VesselModule(VesselModuleType.HABITATION, 1.0)
+						new VesselModule(VesselModuleType.HABITATION, 1000.0)
 				)
 		);
 		
 		ArrayList<VesselModule> fuelStoresList = new ArrayList<VesselModule>(
 				Arrays.asList(
-						new VesselModule(VesselModuleType.FUELSTORES, 1.0)
+						new VesselModule(VesselModuleType.FUELSTORES, 1000.0)
 				)
 		);
 		
 		ArrayList<VesselModule> lifeSupportList = new ArrayList<VesselModule>(
 				Arrays.asList(
-						new VesselModule(VesselModuleType.LIFESUPPORT, 1.0)
+						new VesselModule(VesselModuleType.LIFESUPPORT, 1000.0)
 				)
 		);
 		
 		ArrayList<VesselModule> radarList = new ArrayList<VesselModule>(
 				Arrays.asList(
-						new VesselModule(VesselModuleType.RADAR, 2.0)
+						new VesselModule(VesselModuleType.RADAR, 2000.0)
 				)
 		);
 		
 		ArrayList<VesselModule> commandsList = new ArrayList<VesselModule>(
 				Arrays.asList(
-						new VesselModule(VesselModuleType.COMMAND, 1.0)
+						new VesselModule(VesselModuleType.COMMAND, 1000.0)
 				)
 		);
 		
 		ArrayList<VesselModule> storesList = new ArrayList<VesselModule>(
 				Arrays.asList(
-						new VesselModule(VesselModuleType.STORES, 1.0)
+						new VesselModule(VesselModuleType.STORES, 1000.0)
 				)
 		);
 		
@@ -102,13 +114,16 @@ public class VesselClass {
 		modulesListMap.put(VesselModuleType.COMMAND, commandsList);
 		modulesListMap.put(VesselModuleType.STORES, storesList);
 		
-		refreshMass();
+		refreshProperties();
 	}
 	
-	private double refreshMass() {
+	private void refreshProperties() {
 		
+		// Prepare to aggregate module properties
 		double newMass = 0.0;
+		double newThrust = 0.0;
 		
+		// Aggregate module properties
 		Iterator<Entry<VesselModuleType, ArrayList<VesselModule>>> mapIterator = modulesListMap.entrySet().iterator();
 		
 		while (mapIterator.hasNext()) {
@@ -125,11 +140,25 @@ public class VesselClass {
 				
 				newMass = newMass + module.getMass();
 				
+				// Accumulate other properties as appropriate
+				switch (module.getType()) {
+					case ENGINE:
+						newThrust = newThrust + module.getOutput();
+						break;
+				}
+				
 			}
 		}
 		
-		// log.warning("Currently arbitrary return value");
+		// Derive derived properties
 		mass = newMass;
-		return newMass;
+		this.reflectionArea = Math.pow(mass, 2/3); // Assuming 1 face of a cube
+		this.length = Math.pow(mass/2, 1/3) * 2; // Assuming it's 2x as long as high and wide
+		this.thrust = newThrust;
+		this.twr = thrust / mass;
+		this.topSpeed = twr; // Cartoon physics		
+		this.emits = this.thrust;
+		
+		return;
 	}
 }
