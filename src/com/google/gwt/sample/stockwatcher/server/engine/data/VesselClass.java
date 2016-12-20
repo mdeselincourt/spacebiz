@@ -28,8 +28,14 @@ public class VesselClass {
 
 	private double emits;
 	
-	public VesselClass() {
+	// Trying out having an enum for hard coded test classes
+	public enum VesselClassExamples {
+		BOAT, VIPER, LAKON, NIMITZ
+	}
+	
+	public VesselClass(VesselClassExamples template ) {
 		
+		log.warning("TODO: This examples/template implementation smells bad");
 		log.warning("Currently just creates defaults");
 		// Creates a Patrol Boat modelled on a roughly lifeboat or F-14 sized thing 
 		//
@@ -105,6 +111,8 @@ public class VesselClass {
 				)
 		);
 		
+		modulesListMap = new HashMap<VesselModuleType,ArrayList<VesselModule>>();
+		
 		modulesListMap.put(VesselModuleType.REACTOR, reactorsList);
 		modulesListMap.put(VesselModuleType.ENGINE, enginesList);
 		modulesListMap.put(VesselModuleType.HABITATION, habitationsList);
@@ -140,10 +148,15 @@ public class VesselClass {
 				
 				newMass = newMass + module.getMass();
 				
+				//log.info("module.toString() = " + module.toString());
+				//log.info("module.getType().toString() = " + module.getType().toString());
+				
 				// Accumulate other properties as appropriate
 				switch (module.getType()) {
 					case ENGINE:
 						newThrust = newThrust + module.getOutput();
+						break;
+					default:
 						break;
 				}
 				

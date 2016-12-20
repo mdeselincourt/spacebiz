@@ -16,6 +16,7 @@ public class VesselModule {
 
 	public VesselModule(VesselModuleType t, double m) {
 
+		setType(t);
 		mass = m;
 
 		// Derive output from mass //

@@ -9,6 +9,7 @@ import com.google.gwt.sample.stockwatcher.server.engine.data.SensorType;
 import com.google.gwt.sample.stockwatcher.server.engine.data.Signature;
 import com.google.gwt.sample.stockwatcher.server.engine.data.SignatureType;
 import com.google.gwt.sample.stockwatcher.server.engine.data.Vessel;
+import com.google.gwt.sample.stockwatcher.server.engine.data.VesselClass;
 import com.google.gwt.sample.stockwatcher.server.engine.data.VesselMindState;
 
 public class Encounter {
@@ -41,6 +42,9 @@ public class Encounter {
 		
 		// TWR (speed) 30 m/s (about motorway speed)
 		// Therefore emittance = 390,000 thrust units for a small craft like this
+		
+		// See Gdrive document and DIAGRAMS for physical model
+		
 		// Receiver sensitivity = 0.001, so it can be felt at about 20km
 		// Emitter amp = 4,000,000 which with that sensitivity gives radar range 31km with
 		// high energy 1-metre waves.
@@ -52,10 +56,12 @@ public class Encounter {
 		Vessel[] vs = new Vessel[2];
 		
 		// 100t 100-speed ship
-		vs[0] = new Vessel("Lakon Type 9", 100000.0, 100.0, 0.001, 4000000, 1, AiGoal.ESCAPE);
+		//vs[0] = new Vessel("Lakon Type 9", 100000.0, 100.0, 0.001, 4000000, 1, AiGoal.ESCAPE);
+		vs[0] = new Vessel("My Lakon Type 9", AiGoal.ESCAPE, VesselClass.VesselClassExamples.LAKON);
 		
 		// 25t 300-speed ship
-		vs[1] = new Vessel("Viper Mk III", 25000.0, 300.0, 0.001, 4000000, 1, AiGoal.KILL);
+		//vs[1] = new Vessel("Viper Mk III", 25000.0, 300.0, 0.001, 4000000, 1, AiGoal.KILL);
+		vs[1] = new Vessel("My Viper", AiGoal.KILL, VesselClass.VesselClassExamples.VIPER);
 		
 		Encounter e = new Encounter(vs);
 		
