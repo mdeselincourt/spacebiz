@@ -1,8 +1,22 @@
 package com.google.gwt.sample.stockwatcher.server.engine.data;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import com.google.gwt.sample.stockwatcher.server.engine.Encounter;
 
+/**
+ * Represents a real physical instance of a vessel. 
+ * 
+ * Appropriately enough it literally extends a VesselClass! 
+ * 
+ * It also implements SpaceObject
+ * 
+ * @author michael.deselincourt
+ *
+ */
 public class Vessel extends VesselClass implements SpaceObject {
 
 	private static final Logger log = Logger.getLogger(Vessel.class.getName());
@@ -11,30 +25,15 @@ public class Vessel extends VesselClass implements SpaceObject {
 
 	// Semi-static physical attributes	
 	private double topSpeed;
-
-	// Physical attributes
-	private double mass;
-	private double reflectionArea;
-	private double emits;
-	
-	private double twr;
-	private double speed;
-	private double thrust;
-	
+		
 	// Mental state
 	private VesselMindState mindState;
 	
 	// Physical state
-	private double x;
+	private double x = 0.0;
 	
-	// Actual current 1D vector during an encounter
-	private double course;
-	
-	// Detection equipment
-	private double detectionThreshold;
-	private double radarAmplitude;
-	private double radarWavelength;
-	private double power;
+	// Actual current 1D vector during an encounter.
+	private double course = 0.0;
 	
 	public String getName() {
 		return name;
@@ -125,22 +124,25 @@ public class Vessel extends VesselClass implements SpaceObject {
 	}
 
 	/**
-	 * Intended (but doesn't 
+	 * Constructor for a Vessel
 	 * 
-	 * @param name
-	 * @param standingOrders
+	 * Creates the vessel's mental and physical state.
+	 * 
+	 * @param name name
+	 * @param standingOrders an AiGoal to be the vessel's "standing orders"
+	 * @param template Takes an option from VesselClass.VesselClassExamples e.g. VIPER and immediately runs its super() to load that "template"
+	 * 		
 	 */
-	
 	public Vessel(String name, AiGoal standingOrders, VesselClass.VesselClassExamples template) {
 		
 		super(template); // At time of writing the VesselClass constructor has hard-coded values
 		
 		log.warning("TODO: This examples implementation smells bad");
 		
-		// Use the choice of VesselClass to instantiate this derp
-		
+		// Use the choice of VesselClass to instantiate this
 		this.name = name;
 		
+		// Create a new MindState (and load the recieved standingOrders in as part of it)
 		this.mindState = new VesselMindState();
 		mindState.setStandingOrders(standingOrders);
 		mindState.setGoal(AiGoal.TRAVEL);
@@ -149,7 +151,14 @@ public class Vessel extends VesselClass implements SpaceObject {
 		
 		log.severe("!!! ! ! Rewriting of Vessel class not complete ! ! !!!");
 		
-		// this.mass = TODO: CONTINUE FRMO HERE! 
+		// Calculate physical properties
+		refreshProperties();
+		
+		// Set default spatial condition
+		this.x = 0.0;
+		
+		log.info("'" + name + "' instantiated. reflectionArea = " + reflectionArea);
+		
 	}
 	
 	@Override
@@ -175,7 +184,7 @@ public class Vessel extends VesselClass implements SpaceObject {
 	}
 
 	public void setX(double x) {
-		log.info("Moving " + this.name + " from " + this.x + " to " + x);
+		log.info(this.name + "'s position updated from " + this.x + " to " + x);
 		this.x = x;
 	}
 

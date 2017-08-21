@@ -1,6 +1,6 @@
 package com.google.gwt.sample.stockwatcher.server.engine.data;
 
-import com.google.gwt.sample.stockwatcher.server.engine.Encounter;
+//import com.google.gwt.sample.stockwatcher.server.engine.Encounter;
 
 public interface SpaceObject {
 

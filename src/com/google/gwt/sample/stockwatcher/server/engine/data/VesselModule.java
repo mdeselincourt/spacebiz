@@ -2,6 +2,17 @@ package com.google.gwt.sample.stockwatcher.server.engine.data;
 
 import java.util.logging.Logger;
 
+/**
+ * Vessel module
+ * 
+ * Has a type (reactor etc.) and a fundamental property mass.
+ * 
+ * A load of other attributes (either generically "output" or more specific ones like
+ * amplitude or wavelength) are generally derived.
+ * 
+ * @author michael.deselincourt
+ *
+ */
 public class VesselModule {
 
 	private static final Logger log = Logger.getLogger(VesselModule.class.getName());

@@ -32,7 +32,7 @@ public class Encounter {
 	long incidentStart = -1; // Offset for participant-subjective clock; -1 means not set yet
 	long interrupt = 0; // Using long because we will be converting from 'double's 
 	
-	int tickLimit = 80;
+	int tickLimit = 5;
 		
 	public Encounter(Vessel[] newVessels) {
 		vessels = newVessels;
@@ -57,6 +57,7 @@ public class Encounter {
 		
 		// 100t 100-speed ship
 		//vs[0] = new Vessel("Lakon Type 9", 100000.0, 100.0, 0.001, 4000000, 1, AiGoal.ESCAPE);
+		log.info("Creating a LAKON");
 		vs[0] = new Vessel("My Lakon Type 9", AiGoal.ESCAPE, VesselClass.VesselClassExamples.LAKON);
 		
 		// 25t 300-speed ship
@@ -84,6 +85,8 @@ public class Encounter {
 		// You should start at first contact range
 		
 		double fcRange = Math.max(contact(vessels[0], vessels[1]), contact(vessels[1], vessels[0])); 
+		
+		log.info("First Contact range fcRange is " + fcRange);
 		
 		// Position vessels; round in favour of proximity
 		vessels[0].setX(Math.ceil(-fcRange / 2));
@@ -322,7 +325,7 @@ public class Encounter {
 			else
 			{
 				// Vessel thinks it is alone
-				log.info(vessel.getName() + " thinks it is alone...");
+				log.info(vessel.getName() + " currently thinks it is alone...");
 				
 				// Set off on what is conveniently a collision course
 				mind.setIntendedCourse(vessel.getTopSpeed() * (0.71) *  -awayFromOpponentUnitVector );
@@ -421,6 +424,9 @@ public class Encounter {
 	
 	// Determine the greatest distance at which a can detect b
 	/**
+	 * Encounter.contact(Vessel a, Vessel b)
+	 * 
+	 * Returns the greatest distance at which vessel a can detect vessel b
 	 * 
 	 * PASSIVE DETECTION:
 	 * 
@@ -431,9 +437,9 @@ public class Encounter {
 	 * 
 	 * [²]
 	 *  
-	 * @param a
-	 * @param b
-	 * @return
+	 * @param a Detecting vessel
+	 * @param b Detected vessel
+	 * @return double Max range at which A can detect B
 	 */
 	private double contact(Vessel a, Vessel b) {
 		
@@ -443,26 +449,25 @@ public class Encounter {
 		// Passive detection
 		double aPassiveDetectBDistance = Math.sqrt(b.getEmits()/a.getDetectionThreshold());
 		
-		//log.info(aName + " 'hears' " + bName + " at range " + aPassiveDetectBDistance);
+		log.info("'" + aName + "' hears '" + bName + "' at range " + aPassiveDetectBDistance);
 		
 		// Active detection involves the target's reflectivity
 		double bReflection = Math.min(b.getReflectionArea()/a.getRadarWavelength(), 1);
 
-		//log.info(aName + " reflectivity = " + aReflection);
+		log.info(bName + " reflectivity = " + bReflection);
 		// Note that it's based on power not amplitude, hence the benefit of lower w/ls for the same amp 
 		double aActiveDetectBDistance = 0.5 * Math.sqrt((a.getPower() * bReflection) / a.getDetectionThreshold());
 
-		//log.info(aName + " 'sees' " + bName + " at range " + aActiveDetectBDistance);
+		log.info(aName + " 'sees' " + bName + " at range " + aActiveDetectBDistance);
 		
 		// Passive-of-active detection
 		double aPassiveDetectBRadarDistance = Math.sqrt(b.getPower()/a.getDetectionThreshold());
 		
-		//log.info(aName + " 'hears' " + bName + "'s RADAR at " + aPassiveDetectBRadarDistance);
+		log.info(aName + " 'hears' " + bName + "'s RADAR at " + aPassiveDetectBRadarDistance);
 
 		// Find the highest range
 		double passiveRange = Math.max(aPassiveDetectBDistance, aActiveDetectBDistance);
 		double range = Math.max(passiveRange, aPassiveDetectBRadarDistance);
-		
 		
 		
 		return range;
